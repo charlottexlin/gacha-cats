@@ -56,7 +56,7 @@ An example CharacterProfile:
 ```
 
 
-## [Link to Commented First Draft Schema](db.js)
+## [Link to Commented First Draft Schema](db.mjs)
 
 
 ## Wireframes
