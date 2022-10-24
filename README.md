@@ -95,9 +95,7 @@ An example CharacterProfile:
 
 In the header of the web app, it shows the title of the game, navigation buttons, player’s username, player’s current score, player’s level, and how many coins and heart capsules they have.
 
-## Site map
-
-[site map](documentation/sitemap.png)
+## [Site map](documentation/sitemap.png)
 
 ## User Stories or Use Cases
 
