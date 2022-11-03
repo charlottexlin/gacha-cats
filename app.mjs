@@ -6,6 +6,7 @@ import passport from 'passport';
 import mongoose from 'mongoose';
 import './db.mjs';
 import './auth.mjs';
+import { equal } from 'assert';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -30,7 +31,7 @@ app.use(passport.session());
 
 // middleware to make player data available to all templates
 app.use((req, res, next) => {
-    res.locals.user = req.user;
+    res.locals.player = req.user;
     next();
 });
 
@@ -53,6 +54,7 @@ app.get('/register', (req, res) => {
 
 // register a new player
 app.post('/register', (req, res, next) => {
+    // create a new player in the database
     Player.register(new Player({
         username: req.body.username,
         currentScore: 0,
@@ -60,13 +62,14 @@ app.post('/register', (req, res, next) => {
         fish: 0,
         playerLevel: 1,
         cats: []
-    }), req.body.password, (err, newPlayer) => {
+    }), req.body.password, (err, player) => {
         if (err) {
-            res.render('register', {message: 'ERROR!!!!!!'});
+            console.log("ERROR", err);
+            res.render('register', {message: 'ERROR!!!!!!'}); // render an error on the register page TODO make error message more specific
         } else {
             passport.authenticate('local', {
-                successRedirect: '/collection',
-                failureRedirect: '/register',
+                successRedirect: '/collection', // redirect to collection page if registration is successful
+                failureRedirect: '/register', // redirect back to register page if unsuccessful
             })(req, res, next);
         }
     });
@@ -74,12 +77,27 @@ app.post('/register', (req, res, next) => {
 
 // login page, where returning players can log into an existing account
 app.get('/login', (req, res) => {
-    res.send("login");
+    res.render('login');
+});
+
+// allow player to log into an existing account
+app.post('/login', (req, res, next) => {
+    passport.authenticate('local', (err, player) => {
+        if (player) {
+            req.logIn(player, (err) => {
+                if (!err) {
+                    res.redirect('/collection');
+                }
+            });
+        } else {
+            res.render('login', {message: 'Account not found'});
+        }
+    })(req, res, next);
 });
 
 // collection page, where players can view the cats they currently have
 app.get('/collection', (req, res) => {
-    res.send("collection page");
+    res.send('collection page, logged in as ' + res.locals.player.username);
 });
 
 // battle start page, where players can set up a battle
