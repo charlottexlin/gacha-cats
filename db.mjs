@@ -26,7 +26,7 @@ const CharacterProfileSchema = new mongoose.Schema({
     image: { data: Buffer, contentType: String }, // image to display to represent this character
     maxHP: {type: Number, min: 0, required: true}, // max HP of this character
     powerLevel: {type: Number, min: 0, required: true}, // number to scale damage off of
-    rarity: {type: String, required: true}, // user-readable name for roll probability (i.e. common, uncommon, rare, or legendary)
+    rarity: {type: String, required: true, enum: ["common", "uncommon", "rare", "legendary"]}, // user-readable name for roll probability (i.e. common, uncommon, rare, or legendary)
     rollProbability: {type: Number, min: 0, required: true} // probability either to receive fighter in gacha, or opponent in battle
 });
 
