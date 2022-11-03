@@ -6,7 +6,6 @@ import passport from 'passport';
 import mongoose from 'mongoose';
 import './db.mjs';
 import './auth.mjs';
-import { equal } from 'assert';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -97,19 +96,19 @@ app.post('/login', (req, res, next) => {
 
 // collection page, where players can view the cats they currently have
 app.get('/collection', (req, res) => {
-    res.send('collection page, logged in as ' + res.locals.player.username);
+    res.render('collection');
 });
 
 // battle start page, where players can set up a battle
 app.get('/battle/start', (req, res) => {
-    res.send("battle start");
+    res.send('Battle: ~~~PAGE UNDER CONSTRUCTION~~~ please check back later!');
 });
 
 // TODO a couple other pages to be implemented
 
 // gacha page, where players can roll on the gacha
 app.get('/gacha', (req, res) => {
-    res.send("gacha page");
+    res.send('Gacha: ~~~PAGE UNDER CONSTRUCTION~~~ please check back later!');
 });
 
 app.listen(process.env.PORT || 3000);
