@@ -34,7 +34,7 @@ app.use(session({
     resave: true,
     saveUninitialized: true
 }));
-app.use(passport.authenticate('session')); // TODO
+app.use(passport.authenticate('session')); // TODO do I need this line
 
 // passport authentication middleware
 app.use(passport.initialize());
@@ -42,7 +42,7 @@ app.use(passport.session());
 
 // middleware to make player data available to all templates
 app.use((req, res, next) => {
-    res.locals.user = req.user; // TODO think this is having some issue
+    res.locals.user = req.user;
     next();
 });
 
@@ -154,10 +154,10 @@ app.post('/gacha/roll', (req, res) => {
         if (err) {
             throw err;
         }
+        req.user.cats.push(newCat._id);
+        req.user.save(); // TODO if you press the roll button in quick succession, an error occurs
         res.redirect("/gacha");
     });
-    req.user.cats.push(newCat._id);
-    req.user.save(); // TODO if you press the roll button in quick succession, an error occurs
 }); 
 
 app.listen(process.env.PORT || 3000);
