@@ -6,7 +6,7 @@ import passport from 'passport';
 import mongoose from 'mongoose';
 import './db.mjs';
 import './auth.mjs';
-import {gachaRoll} from './gacha.mjs';
+import {getGachaRoll} from './gacha.mjs';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -14,6 +14,10 @@ const __dirname = path.dirname(__filename);
 
 // mongoose schemas
 const Player = mongoose.model('Player');
+const Cat = mongoose.model('Cat');
+
+// global (TODO?)
+let rolledCat = {};
 
 // use handlebars
 app.set("view engine", "hbs");
@@ -58,7 +62,7 @@ app.post('/register', (req, res, next) => {
     Player.register(new Player({
         username: req.body.username,
         currentScore: 0,
-        coins: 0,
+        coins: 1000, // TODO temporary for testing
         fish: 0,
         playerLevel: 1,
         cats: []
@@ -101,11 +105,9 @@ app.get('/collection', (req, res) => {
 });
 
 // battle start page, where players can set up a battle
-app.get('/battle/start', (req, res) => {
-    res.send('Battle: ~~~PAGE UNDER CONSTRUCTION~~~ please check back later!');
+app.get('/battle', (req, res) => {
+    res.send(res.render('battle'));
 });
-
-// TODO a couple other pages to be implemented
 
 // gacha page, where players can roll on the gacha
 app.get('/gacha', (req, res) => {
@@ -114,7 +116,36 @@ app.get('/gacha', (req, res) => {
 
 // gacha roll page, where players can see what cat they rolled
 app.get('/gacha/roll', (req, res) => {
-    res.render('gacha', {coins: res.locals.player.coins, roll: gachaRoll()});
+    res.locals.player.coins -= 10; // costs 10 coins to roll
+    rolledCat = getGachaRoll(); // calculate the cat the player rolled
+    Cat.findOne({player: res.locals.player._id, fighterProfile: rolledCat}, (err, doc) => {
+        let haveCat = false;
+        if (err) {
+            throw err;
+        }
+        if (doc) {
+            haveCat = true;
+            res.locals.player.coins += 5; // convert cat to 5 coins instead TODO bug with coin count if you roll again directly...
+        }
+        res.render('gacha', {coins: res.locals.player.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+    }); // check if the player already has this TODO does this query work properly?
 });
+
+// post to gacha roll page, where players can name a new cat they just rolled
+app.post('/gacha/roll', (req, res) => {
+    const newCat = new Cat({
+        player: res.locals.player._id,
+        name: req.body.name,
+        fighterProfile: rolledCat, // TODO probably should find a better way to do this
+        currentHP: rolledCat.maxHP,
+        battlesWon: 0
+    });
+    newCat.save((err) => {
+        if (err) {
+            throw err;
+        }
+        res.redirect("/gacha");
+    });
+}); 
 
 app.listen(process.env.PORT || 3000);

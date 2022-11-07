@@ -8,6 +8,6 @@ const chance = new Chance();
 const probabilities = cats.map(cat => cat.rollProbability);
 
 // function to return a randomly selected catProfile object, based on their roll probabilities
-export function gachaRoll() {
+export function getGachaRoll() {
     return chance.weighted(cats, probabilities);
 }
