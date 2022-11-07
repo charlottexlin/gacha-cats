@@ -1,1 +1,8 @@
-This is the collection page where all the cats you have will be shown...
+{{#each cats as |cat|}}
+    <h3>{{cat.defaultName}}</h3>
+    <div>{{cat.subtitle}}</div>
+    <div>{{cat.rarity}}</div>
+    <div>Max HP: {{cat.maxHP}}</div>
+    <div>Power level: {{cat.powerLevel}}</div>
+    <hr>
+{{/each}}

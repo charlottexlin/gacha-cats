@@ -8,7 +8,7 @@ const PlayerSchema = new mongoose.Schema({
     coins: {type: Number, min: 0, required: true}, // in-game currency used for gacha
     fish: {type: Number, min: 0, required: true}, // in-game currency used for restoring Cat HP
     playerLevel: {type: Number, min: 1, required: true}, // (total # of battles won) / 10
-    cats:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'Cat' }] // array of references to Cats documents; represents the Cats a player has
+    cats: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Cat' }] // array of references to Cats documents; represents the Cats a player has
 });
 
 // authentication for player login

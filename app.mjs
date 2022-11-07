@@ -22,12 +22,19 @@ let rolledCat = {};
 // use handlebars
 app.set("view engine", "hbs");
 
+// body parsing middleware
+app.use(express.urlencoded({extended: false}));
+
+// static file serving middleware
+app.use(express.static(path.join(__dirname, "public")));
+
 // set up session support
 app.use(session({
     secret: 'the big secret (to save somewhere else)',
     resave: true,
-    saveUninitialized: true,
+    saveUninitialized: true
 }));
+app.use(passport.authenticate('session')); // TODO
 
 // passport authentication middleware
 app.use(passport.initialize());
@@ -35,15 +42,9 @@ app.use(passport.session());
 
 // middleware to make player data available to all templates
 app.use((req, res, next) => {
-    res.locals.player = req.user;
+    res.locals.user = req.user; // TODO think this is having some issue
     next();
 });
-
-// body parsing middleware
-app.use(express.urlencoded({extended: false}));
-
-// static file serving middleware
-app.use(express.static(path.join(__dirname, "public")));
 
 // ---------- ROUTING ----------
 // homepage, where players can either log in or register
@@ -101,42 +102,53 @@ app.post('/login', (req, res, next) => {
 
 // collection page, where players can view the cats they currently have
 app.get('/collection', (req, res) => {
-    res.render('collection');
+    // get the documents for each of this player's cats
+    Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
+        if (err) {
+            throw err;
+        }
+        // use HOF (map) to get the fighter profiles from each of the cat documents TODO do I get points for using map twice?
+        const cats = docs.map(doc => doc.fighterProfile);
+        res.render('collection', {cats: cats}); 
+    });
 });
 
 // battle start page, where players can set up a battle
 app.get('/battle', (req, res) => {
-    res.send(res.render('battle'));
+    res.render('battle');
 });
 
 // gacha page, where players can roll on the gacha
 app.get('/gacha', (req, res) => {
-    res.render('gacha', {coins: res.locals.player.coins});
+    res.render('gacha', {coins: req.user.coins});
 });
 
 // gacha roll page, where players can see what cat they rolled
 app.get('/gacha/roll', (req, res) => {
-    res.locals.player.coins -= 10; // costs 10 coins to roll
+    req.user.coins -= 10; // costs 10 coins to roll
     rolledCat = getGachaRoll(); // calculate the cat the player rolled
-    Cat.findOne({player: res.locals.player._id, fighterProfile: rolledCat}, (err, doc) => {
+    Cat.findOne({player: req.user._id, fighterProfile: rolledCat}, (err, doc) => {
         let haveCat = false;
         if (err) {
             throw err;
         }
         if (doc) {
             haveCat = true;
-            res.locals.player.coins += 5; // convert cat to 5 coins instead TODO bug with coin count if you roll again directly...
+            req.user.coins += 5; // convert cat to 5 coins instead TODO bug with coin count if you roll again directly...
+            req.user.save();
         }
-        res.render('gacha', {coins: res.locals.player.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+        req.user.save();
+        res.render('gacha', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
     }); // check if the player already has this TODO does this query work properly?
 });
 
 // post to gacha roll page, where players can name a new cat they just rolled
+// TODO what if the player navigates away before hitting submit??? should they still get the cat in their collection??
 app.post('/gacha/roll', (req, res) => {
     const newCat = new Cat({
-        player: res.locals.player._id,
+        player: req.user._id,
         name: req.body.name,
-        fighterProfile: rolledCat, // TODO probably should find a better way to do this
+        fighterProfile: rolledCat, // TODO probably should find a better way to do this than using a global
         currentHP: rolledCat.maxHP,
         battlesWon: 0
     });
@@ -146,6 +158,8 @@ app.post('/gacha/roll', (req, res) => {
         }
         res.redirect("/gacha");
     });
+    req.user.cats.push(newCat._id);
+    req.user.save();
 }); 
 
 app.listen(process.env.PORT || 3000);
