@@ -6,6 +6,7 @@ import passport from 'passport';
 import mongoose from 'mongoose';
 import './db.mjs';
 import './auth.mjs';
+import {gachaRoll} from './gacha.mjs';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -108,7 +109,12 @@ app.get('/battle/start', (req, res) => {
 
 // gacha page, where players can roll on the gacha
 app.get('/gacha', (req, res) => {
-    res.send('Gacha: ~~~PAGE UNDER CONSTRUCTION~~~ please check back later!');
+    res.render('gacha', {coins: res.locals.player.coins});
+});
+
+// gacha roll page, where players can see what cat they rolled
+app.get('/gacha/roll', (req, res) => {
+    res.render('gacha', {coins: res.locals.player.coins, roll: gachaRoll()});
 });
 
 app.listen(process.env.PORT || 3000);
