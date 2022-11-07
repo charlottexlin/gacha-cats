@@ -62,7 +62,7 @@ app.post('/register', (req, res, next) => {
     // create a new player in the database
     Player.register(new Player({
         username: req.body.username,
-        currentScore: 0,
+        winStreak: 0,
         coins: 1000, // TODO temporary for testing
         fish: 0,
         playerLevel: 1,
@@ -125,19 +125,19 @@ app.get('/gacha', (req, res) => {
 app.get('/gacha/roll', (req, res) => {
     req.user.coins -= 10; // costs 10 coins to roll TODO make sure the player has enough coins left, otherwise show a message
     rolledCat = getGachaRoll(); // calculate the cat the player rolled
-    Cat.findOne({player: req.user._id, fighterProfile: rolledCat}, (err, doc) => {
+    Cat.findOne({player: req.user._id, fighterProfile: rolledCat}, (err, doc) => { // check if the player already has this cat
         let haveCat = false;
         if (err) {
             throw err;
         }
         if (doc) {
             haveCat = true;
-            req.user.coins += 5; // convert cat to 5 coins instead TODO bug with coin count if you roll again directly...
+            req.user.coins += 5; // convert cat to 5 coins instead TODO possible bug with coin count
             req.user.save();
         }
         req.user.save();
-        res.render('gacha', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
-    }); // check if the player already has this TODO does this query work properly?
+        res.render('gacha-roll', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+    });
 });
 
 // post to gacha roll page, where players can name a new cat they just rolled
@@ -157,7 +157,7 @@ app.post('/gacha/roll', (req, res) => {
         res.redirect("/gacha");
     });
     req.user.cats.push(newCat._id);
-    req.user.save(); // TODO lol if you click the roll button too many times in a row it gets overwhelmed - sometimes it just randomly breaks...need to find a way to fix this
+    req.user.save(); // TODO if you press the roll button in quick succession, an error occurs
 }); 
 
 app.listen(process.env.PORT || 3000);

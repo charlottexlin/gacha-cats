@@ -4,7 +4,7 @@ import passportLocalMongoose from 'passport-local-mongoose';
 // players, who each must register with a username and password to play the game, and can login to their accounts
 const PlayerSchema = new mongoose.Schema({
     username: {type: String, required: true}, // username
-    currentScore: {type: Number, min: 0, required: true}, // how many battles this player has won in a row, without losing
+    winStreak: {type: Number, min: 0, required: true}, // how many battles this player has won in a row, without losing
     coins: {type: Number, min: 0, required: true}, // in-game currency used for gacha
     fish: {type: Number, min: 0, required: true}, // in-game currency used for restoring Cat HP
     playerLevel: {type: Number, min: 1, required: true}, // (total # of battles won) / 10
@@ -27,4 +27,5 @@ const CatSchema = new mongoose.Schema({
 const Player = mongoose.model('Player', PlayerSchema);
 const Cat = mongoose.model('Cat', CatSchema);
 
-mongoose.connect('mongodb://localhost/final-project');
+// mongoose.connect('mongodb://localhost/final-project');
+mongoose.connect('mongodb+srv://cxl229:TemporaryPassword1107@cluster0.6kfmsf3.mongodb.net/?retryWrites=true&w=majority');

@@ -1,22 +1,3 @@
-{{#if rolledCat}}
-    <br>
-    <img src={{rolledCat.image}} width="100" height="115">
-    <h1>{{rolledCat.defaultName}}</h1>
-    <h2>{{rolledCat.subtitle}}</h2>
-    <h3>{{rolledCat.rarity}}</h3>
-    <div>Max HP: {{rolledCat.maxHP}}</div>
-    <div>Power level: {{rolledCat.powerLevel}}</div>
-    {{#if haveCat}}
-        <h1>You already have this cat - converted to 5 coins instead</h1>
-    {{else}}
-        <form method = "POST" action = "/gacha/roll">
-            <label for="name">Rename your cat:</label>
-            <input type = "text" name = "name" value = {{rolledCat.defaultName}}>
-            <input type = "submit" value = "Submit">
-        </form>
-    {{/if}}
-{{/if}}
-<br>
 <br>
 <a href="/gacha/roll">ROLL!! (10 coins)</a>
 <div>You currently have {{coins}} coins.</div>
