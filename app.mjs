@@ -107,9 +107,7 @@ app.get('/collection', (req, res) => {
         if (err) {
             throw err;
         }
-        // use HOF (map) to get the fighter profiles from each of the cat documents TODO do I get points for using map twice?
-        const cats = docs.map(doc => doc.fighterProfile);
-        res.render('collection', {cats: cats}); 
+        res.render('collection', {cats: docs}); 
     });
 });
 
@@ -159,7 +157,7 @@ app.post('/gacha/roll', (req, res) => {
         res.redirect("/gacha");
     });
     req.user.cats.push(newCat._id);
-    req.user.save();
+    req.user.save(); // TODO lol if you click the roll button too many times in a row it gets overwhelmed
 }); 
 
 app.listen(process.env.PORT || 3000);

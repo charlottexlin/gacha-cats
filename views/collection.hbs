@@ -1,8 +1,8 @@
 {{#each cats as |cat|}}
-    <h3>{{cat.defaultName}}</h3>
-    <div>{{cat.subtitle}}</div>
-    <div>{{cat.rarity}}</div>
-    <div>Max HP: {{cat.maxHP}}</div>
-    <div>Power level: {{cat.powerLevel}}</div>
+    <h3>{{cat.name}}</h3>
+    <div>{{cat.fighterProfile.rarity}}</div>
+    <div>Power level: {{cat.fighterProfile.powerLevel}}</div>
+    <div>Current HP: {{cat.currentHP}}</div>
+    <div>Battles won: {{cat.battlesWon}}</div>
     <hr>
 {{/each}}
