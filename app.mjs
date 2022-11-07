@@ -123,7 +123,7 @@ app.get('/gacha', (req, res) => {
 
 // gacha roll page, where players can see what cat they rolled
 app.get('/gacha/roll', (req, res) => {
-    req.user.coins -= 10; // costs 10 coins to roll
+    req.user.coins -= 10; // costs 10 coins to roll TODO make sure the player has enough coins left, otherwise show a message
     rolledCat = getGachaRoll(); // calculate the cat the player rolled
     Cat.findOne({player: req.user._id, fighterProfile: rolledCat}, (err, doc) => {
         let haveCat = false;
@@ -157,7 +157,7 @@ app.post('/gacha/roll', (req, res) => {
         res.redirect("/gacha");
     });
     req.user.cats.push(newCat._id);
-    req.user.save(); // TODO lol if you click the roll button too many times in a row it gets overwhelmed
+    req.user.save(); // TODO lol if you click the roll button too many times in a row it gets overwhelmed - sometimes it just randomly breaks...need to find a way to fix this
 }); 
 
 app.listen(process.env.PORT || 3000);
