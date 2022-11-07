@@ -15,27 +15,28 @@ const PlayerSchema = new mongoose.Schema({
 // authentication for player login
 PlayerSchema.plugin(passportLocalMongoose);
 
-// cats, which belong to players. Players may have multiple cats, but only one of each with the same CharacterProfile.
+// cats, which belong to players. Players may have multiple cats, but only one of each with the same FighterProfile.
 const CatSchema = new mongoose.Schema({
     player: {type: mongoose.Schema.Types.ObjectId, ref: 'Player'}, // a reference to the Player to which this Cat belongs
-    characterProfile: {type: mongoose.Schema.Types.ObjectId, ref:'CharacterProfile'}, // a reference to a CharacterProfile document, which holds the immutable properties of this Cat
+    fighterProfile: {type: mongoose.Schema.Types.ObjectId, ref:'FighterProfile'}, // a reference to a FighterProfile document, which holds the immutable properties of this Cat
     currentHP: {type: Number, min: 0, required: true}, // increases if a fish is used on this Cat, decreases in battle
     battlesWon: {type: Number, min: 0, required: true} // how many battles this Cat has won
 });
 
-// character profiles, which store unchangeable data related to a specific cat or opponent
-const CharacterProfileSchema = new mongoose.Schema({
-    name: {type: String, required: true}, // name of this character
-    image: { data: Buffer, contentType: String }, // image to display to represent this character
-    maxHP: {type: Number, min: 0, required: true}, // max HP of this character
+// fighter profiles, which store unchangeable data related to a specific cat or opponent
+const FighterProfileSchema = new mongoose.Schema({
+    defaultName: {type: String, required: true}, // default name of this fighter
+    subtitle: {type: String, required: true}, // text to be displayed with the fighter's name
+    image: { data: Buffer, contentType: String }, // image to display to represent this fighter
+    maxHP: {type: Number, min: 0, required: true}, // max HP of this fighter
     powerLevel: {type: Number, min: 0, required: true}, // number to scale damage off of
     rarity: {type: String, required: true, enum: ["common", "uncommon", "rare", "legendary"]}, // user-readable name for roll probability
-    rollProbability: {type: Number, min: 0, required: true} // probability either to receive fighter in gacha, or opponent in battle
+    rollProbability: {type: Number, min: 0, required: true} // probability either to receive cat in gacha, or opponent in battle
 });
 
 // Register models
 const Player = mongoose.model('Player', PlayerSchema);
 const Cat = mongoose.model('Cat', CatSchema);
-const CharacterProfile = mongoose.model('CharacterProfile', CharacterProfileSchema);
+const FighterProfile = mongoose.model('FighterProfile', FighterProfileSchema);
 
 mongoose.connect('mongodb://localhost/final-project');
