@@ -34,7 +34,6 @@ app.use(session({
     resave: true,
     saveUninitialized: true
 }));
-app.use(passport.authenticate('session')); // TODO do I need this line
 
 // passport authentication middleware
 app.use(passport.initialize());
@@ -133,10 +132,13 @@ app.get('/gacha/roll', (req, res) => {
         if (doc) {
             haveCat = true;
             req.user.coins += 5; // convert cat to 5 coins instead TODO possible bug with coin count
-            req.user.save();
         }
-        req.user.save();
-        res.render('gacha-roll', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+        req.user.save((err) => {
+            if (err) {
+                throw err;
+            }
+            res.render('gacha-roll', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+        });
     });
 });
 
@@ -146,7 +148,7 @@ app.post('/gacha/roll', (req, res) => {
     const newCat = new Cat({
         player: req.user._id,
         name: req.body.name,
-        fighterProfile: rolledCat, // TODO probably should find a better way to do this than using a global
+        fighterProfile: rolledCat, // TODO maybe should find a better way to do this than using a global?? Don't know yet
         currentHP: rolledCat.maxHP,
         battlesWon: 0
     });
@@ -155,8 +157,12 @@ app.post('/gacha/roll', (req, res) => {
             throw err;
         }
         req.user.cats.push(newCat._id);
-        req.user.save(); // TODO if you press the roll button in quick succession, an error occurs
-        res.redirect("/gacha");
+        req.user.save((err) => {
+            if (err) {
+                throw err;
+            }
+            res.redirect('/gacha');
+        });
     });
 }); 
 

@@ -10,7 +10,7 @@
 {{else}}
     <form method = "POST" action = "/gacha/roll">
         <label for="name">Rename your cat:</label>
-        <input type = "text" name = "name" value = {{rolledCat.defaultName}}>
+        <input type = "text" name = "name" value = {{{rolledCat.defaultName}}}>
         <input type = "submit" value = "Submit">
     </form>
 {{/if}}
