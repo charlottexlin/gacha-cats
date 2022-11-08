@@ -29,7 +29,7 @@ app.use(express.urlencoded({extended: false}));
 // static file serving middleware
 app.use(express.static(path.join(__dirname, "public")));
 
-// set up session support
+// set up session support [REFERENCE: memorystore documentation https://www.npmjs.com/package/memorystore]
 const Store = memoryStore(session);
 app.use(session({
     cookie: { maxAge: 86400000 },
@@ -67,7 +67,7 @@ app.get('/register', (req, res) => {
     res.render('register');
 });
 
-// register a new player
+// register a new player [REFERENCE: Professor Versoza's slides on Passport.js https://cs.nyu.edu/courses/fall22/CSCI-UA.0467-001/_site/slides/16/auth.html#/ and Passport.js documentation https://www.passportjs.org/docs/]
 app.post('/register', (req, res, next) => {
     // create a new player in the database
     Player.register(new Player({
