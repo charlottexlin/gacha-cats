@@ -44,6 +44,4 @@ export class FighterProfile {
             this.rollProbability = 0;
         }
     }
-
-    // TODO: add some methods, like attacking, etc
 }

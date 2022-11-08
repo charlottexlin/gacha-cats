@@ -27,5 +27,4 @@ const CatSchema = new mongoose.Schema({
 const Player = mongoose.model('Player', PlayerSchema);
 const Cat = mongoose.model('Cat', CatSchema);
 
-// mongoose.connect('mongodb://localhost/final-project');
 mongoose.connect('mongodb+srv://cxl229:TemporaryPassword1107@cluster0.6kfmsf3.mongodb.net/?retryWrites=true&w=majority');

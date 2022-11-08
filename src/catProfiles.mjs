@@ -2,7 +2,7 @@
 import {FighterProfile} from './fighterProfile.mjs';
 
 export const cats = [
-    // common cats (11%)
+    // common cats (11%) - TODO might still adjust all these stats and probabilities depending on how i want the game played later on
     new FighterProfile("Ginger", "Fierce orange warrior", "cat", "/img/test.png", 50, 5, "common", 0.11),
     new FighterProfile("Coffee", "Caffeine-fueled fighter", "cat", "/img/test.png", 50, 5, "common", 0.11),
     new FighterProfile("Chi", "Sweet homebody", "cat", "/img/test.png", 50, 5, "common", 0.11),
@@ -11,7 +11,7 @@ export const cats = [
     new FighterProfile("Shadow", "Mysterious wanderer", "cat", "/img/test.png", 60, 4, "common", 0.11),
     new FighterProfile("Mittens", "Sanguine sleepyhead", "cat", "/img/test.png", 60, 4, "common", 0.11),
     // uncommon cats (4%)
-    new FighterProfile("Potato chip", "Snack-loving siamese", "cat", "/img/test.png", 60, 7, "uncommon", 0.04), // TODO the full name isn't showing up in the rename form
+    new FighterProfile("Potato chip", "Snack-loving siamese", "cat", "/img/test.png", 60, 7, "uncommon", 0.04),
     new FighterProfile("Princess Snowball", "Do not disrespect the princess!", "cat", "/img/test.png", 60, 7, "uncommon", 0.04),
     new FighterProfile("Panda", "Cute but deadly", "cat", "/img/test.png", 50, 8, "uncommon", 0.04),
     new FighterProfile("Fluffy", "The fluffiest feline", "cat", "/img/test.png", 70, 6, "uncommon", 0.04),

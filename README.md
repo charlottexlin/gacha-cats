@@ -122,3 +122,4 @@ In the header of the web app, it shows the title of the game, navigation buttons
 3. [mongoose stack overflow](https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose) - (app.mjs)
 4. [chance.js documentation](https://chancejs.com/usage/node.html) - (gacha.mjs)
 5. [chance.js documentation for 'weighted' function](https://chancejs.com/miscellaneous/weighted.html) - (gacha.mjs)
+6. [memorystore documentation](https://www.npmjs.com/package/memorystore) - (app.mjs)
