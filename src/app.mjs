@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import session from 'express-session';
+import memoryStore from 'memorystore';
 import passport from 'passport';
 import mongoose from 'mongoose';
 import './db.mjs';
@@ -29,11 +30,17 @@ app.use(express.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, "public")));
 
 // set up session support
+const Store = memoryStore(session);
 app.use(session({
-    secret: 'the big secret (to save somewhere else)',
-    resave: true,
-    saveUninitialized: true
+    cookie: { maxAge: 86400000 },
+    secret: 'the big secret',
+    resave: false,
+    saveUninitialized: false,
+    store: new Store({
+        checkPeriod: 86400000 // expired entries will be cleaned up every 24 hours
+    })
 }));
+app.use(passport.authenticate('session'));
 
 // passport authentication middleware
 app.use(passport.initialize());
@@ -46,9 +53,13 @@ app.use((req, res, next) => {
 });
 
 // ---------- ROUTING ----------
-// homepage, where players can either log in or register
+// homepage, where not-logged-in players can either log in or register (logged-in players will be redirected to the collection page)
 app.get('/', (req, res) => {
-    res.render('index');
+    if (!req.user) {
+        res.render('index');
+    } else {
+        res.redirect('/collection');
+    }
 });
 
 // registration page, where new players can make an account

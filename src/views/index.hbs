@@ -1,7 +1,9 @@
-Welcome, this is the homepage for Gacha Cats!
-<div>
-<a href="/register">Register (for new players)</a>
-</div>
-<div>
-<a href="/login">Login (for returning players)</a>
-</div>
+<h3>Welcome to Gacha Cats!</h3>
+{{#unless user}}
+    <div>
+    <a href="/register">Register (for new players)</a>
+    </div>
+    <div>
+    <a href="/login">Login (for returning players)</a>
+    </div>
+{{/unless}}

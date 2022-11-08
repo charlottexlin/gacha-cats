@@ -106,11 +106,11 @@ In the header of the web app, it shows the title of the game, navigation buttons
 
 ## Research Topics
 
-* (5 points) User authentication using PassportJS
+* (5? points) User authentication using PassportJS
 * (1 point) Implemented gacha functionality using ChanceJS
-* (3 points) Thinking about implementing some Unit Tests using Jasmine
+* (1 point) Session store w/o memory leaks using MemoryStore
 * (2 points) Planning to use tailwind.css for the UI
-* (? points) Currently looking for some additional libraries to use, specifically for animation or other features
+* (? points) Currently looking for some additional libraries to use, specifically for animation and possibly other features
 
 ## [Link to Initial Main Project File](app.js) 
 
