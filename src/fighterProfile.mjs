@@ -1,5 +1,5 @@
 export class FighterProfile {
-    constructor(defaultName, subtitle, fighterType, image, maxHP, powerLevel, rarity, rollProbability) {
+    constructor(defaultName, subtitle, fighterType, image, maxHP, powerLevel, critRate, rarity, rollProbability) {
         // set the default name of this fighter
         this.defaultName = defaultName + "";
 
@@ -28,6 +28,13 @@ export class FighterProfile {
             this.powerLevel = powerLevel;
         } else {
             this.powerLevel = 0;
+        }
+
+        // critical hit rate
+        if (critRate >= 0) {
+            this.critRate = critRate;
+        } else {
+            this.critRate = 0;
         }
 
         // user-readable name for roll probability

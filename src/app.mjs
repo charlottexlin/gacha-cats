@@ -8,6 +8,8 @@ import mongoose from 'mongoose';
 import './db.mjs';
 import './auth.mjs';
 import {getGachaRoll} from './gacha.mjs';
+import './opponentProfiles.mjs';
+import { getOpponent } from './opponentProfiles.mjs';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -27,7 +29,7 @@ app.set("view engine", "hbs");
 app.use(express.urlencoded({extended: false}));
 
 // static file serving middleware
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // set up session support [REFERENCE: memorystore documentation https://www.npmjs.com/package/memorystore]
 const Store = memoryStore(session);
@@ -40,7 +42,6 @@ app.use(session({
         checkPeriod: 86400000 // expired entries will be cleaned up every 24 hours
     })
 }));
-app.use(passport.authenticate('session'));
 
 // passport authentication middleware
 app.use(passport.initialize());
@@ -76,7 +77,8 @@ app.post('/register', (req, res, next) => {
         coins: 1000, // TODO temporary for testing
         fish: 0,
         playerLevel: 1,
-        cats: []
+        cats: [],
+        currentOpponent: getOpponent('Mr Test') // TODO temporary for testing
     }), req.body.password, (err, player) => {
         if (err) {
             console.log("ERROR", err);
@@ -123,7 +125,8 @@ app.get('/collection', (req, res) => {
 
 // battle start page, where players can set up a battle
 app.get('/battle', (req, res) => {
-    res.render('battle');
+    console.log(req.user.currentOpponent + " " + req.user.cats); // TODO
+    res.render('battle', {opponent: req.user.currentOpponent, cats: req.user.cats});
 });
 
 // gacha page, where players can roll on the gacha
@@ -131,7 +134,7 @@ app.get('/gacha', (req, res) => {
     res.render('gacha', {coins: req.user.coins});
 });
 
-// gacha roll page, where players can see what cat they rolled
+// gacha roll page, where players can see what cat they rolled TODO might add some scripts so that this isn't a route, i.e. just use /gacha route
 app.get('/gacha/roll', (req, res) => {
     req.user.coins -= 10; // costs 10 coins to roll TODO make sure the player has enough coins left, otherwise show a message
     rolledCat = getGachaRoll(); // calculate the cat the player rolled
