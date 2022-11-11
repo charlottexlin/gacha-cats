@@ -1,8 +1,10 @@
 // profiles for cats
 import {FighterProfile} from './fighterProfile.mjs';
 
+// TODO decrease these crit rates lol
+
 export const cats = [
-    // common cats (11%) - TODO might still adjust all these stats and probabilities depending on how i want the game played later on
+    // common cats (11%)
     new FighterProfile("Ginger", "Fierce orange warrior", "cat", "/img/test.png", 50, 5, 0.1, "common", 0.11),
     new FighterProfile("Coffee", "Caffeine-fueled fighter", "cat", "/img/test.png", 50, 5, 0.11, "common", 0.11),
     new FighterProfile("Chi", "Sweet homebody", "cat", "/img/test.png", 50, 5, 0.12, "common", 0.11),

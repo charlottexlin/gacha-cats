@@ -1,12 +1,12 @@
 <h2>Battle set up</h2>
 <h3>The current opponent is...</h3>
-<h3 id="opponentName">{{opponent.defaultName}}</h3>
+<h3 id="opponentName">{{opponent.fighterProfile.defaultName}}</h3>
 <form id="startBattleForm" method="POST" action="battle">
 	<div>
-		<label for="cat">Choose your fighter:</label>
-        <select name="cats">
+		<label for="chosenCat">Choose your fighter:</label>
+        <select name="chosenCat">
             {{#each cats as |cat|}}
-                <option value={{cat}}>{{cat.name}}</option>
+                <option value={{cat.name}}>{{cat.name}}</option>
             {{/each}}
         </select>
 	</div>
@@ -14,7 +14,3 @@
 		<input type="submit" value="Begin battle">
 	</div>
 </form>
-<div id="catInfo"></div>
-<div id="opponentInfo"></div>
-<button id="attackBtn">ATTACK!</button>
-<script src="/battle.mjs" type="module">></script>

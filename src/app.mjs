@@ -8,8 +8,8 @@ import mongoose from 'mongoose';
 import './db.mjs';
 import './auth.mjs';
 import {getGachaRoll} from './gacha.mjs';
-import './opponentProfiles.mjs';
-import { getOpponent } from './opponentProfiles.mjs';
+import {getOpponent} from './opponentProfiles.mjs';
+import {battleRound, createOpponent} from './battle.mjs';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -21,6 +21,8 @@ const Cat = mongoose.model('Cat');
 
 // global (TODO?)
 let rolledCat = {};
+let chosenCat = {};
+let currentOpponent = {};
 
 // use handlebars
 app.set("view engine", "hbs");
@@ -125,16 +127,49 @@ app.get('/collection', (req, res) => {
 
 // battle start page, where players can set up a battle
 app.get('/battle', (req, res) => {
-    console.log(req.user.currentOpponent + " " + req.user.cats); // TODO
-    res.render('battle', {opponent: req.user.currentOpponent, cats: req.user.cats});
+    // create opponent
+    currentOpponent = createOpponent(req.user.currentOpponent);
+
+    // get the documents for each of this player's cats
+    Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
+        if (err) {
+            throw err;
+        }
+        res.render('battle', {opponent: currentOpponent, cats: docs});
+    });
 });
+
+// player chooses which cat to use
+app.post('/battle', (req, res) => {
+    Cat.findOne({name: req.body.chosenCat}, (err, cat) => {
+        if (err) {
+            throw err;
+        }
+        chosenCat = cat;
+        res.redirect('/battle/fight');
+    });
+})
+
+// battle fight page, where players can fight an opponent
+app.get('/battle/fight', (req, res) => {
+    if (battleRound(chosenCat, currentOpponent) == true) { // TODO what about first round
+        res.render('battle-fight', {opponent: currentOpponent, cat: chosenCat});
+    } // TODO should I just do this client-side? should this send back code for the broswer to run somehow????? instead of using render (battle-fight), could run a client-side script to change DOM...?
+    // can we move some of the files to the client-side and then have the server send JSONs to the browser that stores the data it needs - for example catProfiles.cats and opponentProfiles.getOpponent and
+    // whatever all the other logic could be sent through JSON maybe??? I don't really know how to do that. maybe i'll think about it later? i don't know
+    // i just think using an attack button that just reconfigures the UI (and runs some code behind the scenes??) would make more sense but i dont want to put ALL my code on the client side
+    else {
+        currentOpponent = {}; // TODO get a new randomized currentOpponent
+        res.redirect('/collection'); // TODO if the battle ends, stats such as battlesWon should be updated, redirect to win or lose screen, add to coins and fish etc, and remove curent opponent
+    }
+})
 
 // gacha page, where players can roll on the gacha
 app.get('/gacha', (req, res) => {
     res.render('gacha', {coins: req.user.coins});
 });
 
-// gacha roll page, where players can see what cat they rolled TODO might add some scripts so that this isn't a route, i.e. just use /gacha route
+// gacha roll page, where players can see what cat they rolled
 app.get('/gacha/roll', (req, res) => {
     req.user.coins -= 10; // costs 10 coins to roll TODO make sure the player has enough coins left, otherwise show a message
     rolledCat = getGachaRoll(); // calculate the cat the player rolled
