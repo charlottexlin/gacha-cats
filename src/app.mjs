@@ -19,7 +19,7 @@ const __dirname = path.dirname(__filename);
 const Player = mongoose.model('Player');
 const Cat = mongoose.model('Cat');
 
-// global (TODO?)
+// globals (TODO?)
 let rolledCat = {};
 let chosenCat = {};
 let currentOpponent = {};
@@ -154,10 +154,7 @@ app.post('/battle', (req, res) => {
 app.get('/battle/fight', (req, res) => {
     if (battleRound(chosenCat, currentOpponent) == true) { // TODO what about first round
         res.render('battle-fight', {opponent: currentOpponent, cat: chosenCat});
-    } // TODO should I just do this client-side? should this send back code for the broswer to run somehow????? instead of using render (battle-fight), could run a client-side script to change DOM...?
-    // can we move some of the files to the client-side and then have the server send JSONs to the browser that stores the data it needs - for example catProfiles.cats and opponentProfiles.getOpponent and
-    // whatever all the other logic could be sent through JSON maybe??? I don't really know how to do that. maybe i'll think about it later? i don't know
-    // i just think using an attack button that just reconfigures the UI (and runs some code behind the scenes??) would make more sense but i dont want to put ALL my code on the client side
+    }
     else {
         currentOpponent = {}; // TODO get a new randomized currentOpponent
         res.redirect('/collection'); // TODO if the battle ends, stats such as battlesWon should be updated, redirect to win or lose screen, add to coins and fish etc, and remove curent opponent
