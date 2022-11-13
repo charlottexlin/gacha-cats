@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 import './db.mjs';
 import './auth.mjs';
 import {getGachaRoll} from './gacha.mjs';
-import {getOpponent} from './opponentProfiles.mjs';
+import {getOpponent, getRandomOpponent} from './opponentProfiles.mjs';
 import {battleRound, createOpponent} from './battle.mjs';
 
 const app = express();
@@ -23,6 +23,7 @@ const Cat = mongoose.model('Cat');
 let rolledCat = {};
 let chosenCat = {};
 let currentOpponent = {};
+let battleRounds = 0;
 
 // use handlebars
 app.set("view engine", "hbs");
@@ -84,7 +85,7 @@ app.post('/register', (req, res, next) => {
     }), req.body.password, (err, player) => {
         if (err) {
             console.log("ERROR", err);
-            res.render('register', {message: 'ERROR!!!!!!'}); // render an error on the register page TODO make error message more specific
+            res.render('register', {message: 'Error registering'}); // render an error on the register page TODO make error message more specific (e.g. username already taken)
         } else {
             passport.authenticate('local', {
                 successRedirect: '/collection', // redirect to collection page if registration is successful
@@ -121,7 +122,7 @@ app.get('/collection', (req, res) => {
         if (err) {
             throw err;
         }
-        res.render('collection', {cats: docs}); 
+        res.render('collection', {cats: docs});
     });
 });
 
@@ -148,18 +149,97 @@ app.post('/battle', (req, res) => {
         chosenCat = cat;
         res.redirect('/battle/fight');
     });
+    battleRounds = 0;
 })
 
 // battle fight page, where players can fight an opponent
-app.get('/battle/fight', (req, res) => {
-    if (battleRound(chosenCat, currentOpponent) == true) { // TODO what about first round
+app.get('/battle/fight', (req, res) => { // TODO this should maybe not be a "gettable" route. will update
+    // first round of battle
+    if (battleRounds === 0) {
         res.render('battle-fight', {opponent: currentOpponent, cat: chosenCat});
+        battleRounds++;
     }
+    // subsequent rounds
     else {
-        currentOpponent = {}; // TODO get a new randomized currentOpponent
-        res.redirect('/collection'); // TODO if the battle ends, stats such as battlesWon should be updated, redirect to win or lose screen, add to coins and fish etc, and remove curent opponent
+        // battle is ongoing
+        battleRounds++;
+        const roundResults = battleRound(chosenCat, currentOpponent);
+        if (roundResults.continueBattle) {
+            res.render('battle-fight', {opponent: currentOpponent, cat: chosenCat});
+        }
+        // battle has ended, we have a winner
+        else {
+            battleEnd(req, res, roundResults.winner);
+        }
     }
-})
+});
+
+// helper function that does all necessary updates after a battle ends
+async function battleEnd(req, res, winner) {
+    // update cat's current HP and battles won
+    const cat = await Cat.findOne({name: chosenCat.name});
+    cat.currentHP = chosenCat.currentHP;
+    if (winner === 'cat') {
+        cat.battlesWon++;
+    }
+    await cat.save();
+    // player's cat won
+    if (winner === 'cat') {
+        // Give player coins and fish, amount is based on level of current opponent
+        const opponentLevel = currentOpponent.fighterProfile.powerLevel;
+        let fish = 0;
+        let coins = 0;
+        switch (opponentLevel) {
+            case 4:
+                coins = 10;
+                fish = 4;
+                break;
+            case 5:
+                coins = 15;
+                fish = 7;
+                break;
+            case 7:
+                coins = 20;
+                fish = 12;
+                break;
+            case 8:
+                coins = 25;
+                fish = 15;
+                break;
+            case 9:
+                coins = 30;
+                fish = 18;
+                break;
+            case 10:
+                coins = 35;
+                fish = 22;
+                break;
+            case 20:
+                coins = 100;
+                fish = 50;
+                break;
+        }
+        // update player's win streak
+        req.user.winStreak++;
+        // Get a new current opponent for the player
+        const randomOpponent = getRandomOpponent();
+        req.user.currentOpponent = randomOpponent;
+        await req.user.save();
+        // Set global
+        currentOpponent = randomOpponent;
+        // show win screen
+        res.render('battle-win', {fish: fish, coins: coins});
+    }
+    // opponent won
+    else if (winner === 'opponent') {
+        // update player's win streak
+        if (req.user.winStreak > 0) {
+            req.user.winStreak = 0;
+        }
+        // show lose screen
+        res.render('battle-lose');
+    }
+}
 
 // gacha page, where players can roll on the gacha
 app.get('/gacha', (req, res) => {
@@ -194,7 +274,7 @@ app.post('/gacha/roll', (req, res) => {
     const newCat = new Cat({
         player: req.user._id,
         name: req.body.name,
-        fighterProfile: rolledCat, // TODO maybe should find a better way to do this than using a global?? Don't know yet
+        fighterProfile: rolledCat,
         currentHP: rolledCat.maxHP,
         battlesWon: 0
     });
