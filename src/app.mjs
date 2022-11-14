@@ -80,6 +80,7 @@ app.post('/register', (req, res, next) => {
         coins: 1000, // TODO temporary for testing
         fish: 0,
         playerLevel: 1,
+        battleCounter: 0,
         cats: [],
         currentOpponent: getOpponent('Mr Test') // TODO temporary for testing
     }), req.body.password, (err, player) => {
@@ -246,6 +247,13 @@ async function battleEnd(req, res, winner) {
         }
         // update player's win streak
         req.user.winStreak++;
+        // update player's battle counter, and possibly level
+        if (req.user.battleCounter + 1 === 10) { // reached the next level
+            req.user.playerLevel++; // TODO possibly show a message on level up??
+            req.user.battleCounter = 0; // reset battle counter
+        } else {
+            req.user.battleCounter++;
+        }
         // Get a new current opponent for the player
         const randomOpponent = getRandomOpponent();
         req.user.currentOpponent = randomOpponent;
