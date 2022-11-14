@@ -117,27 +117,47 @@ app.post('/login', (req, res, next) => {
 
 // collection page, where players can view the cats they currently have
 app.get('/collection', (req, res) => {
-    // get the documents for each of this player's cats
-    Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
-        if (err) {
-            throw err;
-        }
-        res.render('collection', {cats: docs});
-    });
+    // redirect to homepage if not logged in
+    if (!req.user) {
+        res.redirect('/');
+    } else {
+        // get the documents for each of this player's cats
+        Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
+            if (err) {
+                throw err;
+            }
+            // show collection page that lists all the player's cats
+            if (docs.length === 0) {
+                res.render('collection', {noCats: true, cats: docs});
+            } else {
+                res.render('collection', {noCats: false, cats: docs});
+            }
+        });
+    }
 });
 
 // battle start page, where players can set up a battle
 app.get('/battle', (req, res) => {
-    // create opponent
-    currentOpponent = createOpponent(req.user.currentOpponent);
+    // redirect to homepage if not logged in
+    if (!req.user) {
+        res.redirect('/');
+    } else {
+        // create opponent
+        currentOpponent = createOpponent(req.user.currentOpponent);
 
-    // get the documents for each of this player's cats
-    Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
-        if (err) {
-            throw err;
-        }
-        res.render('battle', {opponent: currentOpponent, cats: docs});
-    });
+        // get the documents for each of this player's cats
+        Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
+            if (err) {
+                throw err;
+            }
+            // show battle set-up page with dropdown options for all the player's cats
+            if (docs.length === 0) {
+                res.render('battle', {opponent: currentOpponent, noCats: true, cats: docs});
+            } else {
+                res.render('battle', {opponent: currentOpponent, noCats: false, cats: docs});
+            }
+        });
+    }
 });
 
 // player chooses which cat to use
@@ -146,10 +166,15 @@ app.post('/battle', (req, res) => {
         if (err) {
             throw err;
         }
-        chosenCat = cat;
-        res.redirect('/battle/fight');
+        // Can not use a cat in battle if they are at 0 HP
+        if (cat.currentHP <= 0) {
+            res.render('battle', {message: cat.name + " is at 0 HP and can not battle. Restore their HP by feeding them fish on the collection page."});
+        } else {
+            chosenCat = cat;
+            battleRounds = 0;
+            res.redirect('/battle/fight');
+        }
     });
-    battleRounds = 0;
 })
 
 // battle fight page, where players can fight an opponent
@@ -243,29 +268,39 @@ async function battleEnd(req, res, winner) {
 
 // gacha page, where players can roll on the gacha
 app.get('/gacha', (req, res) => {
-    res.render('gacha', {coins: req.user.coins});
+    // redirect to homepage if not logged in
+    if (!req.user) {
+        res.redirect('/');
+    } else {
+        res.render('gacha', {coins: req.user.coins});
+    }
 });
 
 // gacha roll page, where players can see what cat they rolled
 app.get('/gacha/roll', (req, res) => {
-    req.user.coins -= 10; // costs 10 coins to roll TODO make sure the player has enough coins left, otherwise show a message
-    rolledCat = getGachaRoll(); // calculate the cat the player rolled
-    Cat.findOne({player: req.user._id, fighterProfile: rolledCat}, (err, doc) => { // check if the player already has this cat
-        let haveCat = false;
-        if (err) {
-            throw err;
-        }
-        if (doc) {
-            haveCat = true;
-            req.user.coins += 5; // convert cat to 5 coins instead TODO possible bug with coin count
-        }
-        req.user.save((err) => {
+    // player doesn't have enough coins left
+    if (req.user.coins < 10) {
+        res.render('gacha', {message: "You don't have enough coins to roll. Battle to earn more coins!"});
+    } else {
+        req.user.coins -= 10; // costs 10 coins to roll TODO make sure the player has enough coins left, otherwise show a message
+        rolledCat = getGachaRoll(); // calculate the cat the player rolled
+        Cat.findOne({player: req.user._id, fighterProfile: rolledCat}, (err, doc) => { // check if the player already has this cat
+            let haveCat = false;
             if (err) {
                 throw err;
             }
-            res.render('gacha-roll', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+            if (doc) {
+                haveCat = true;
+                req.user.coins += 5; // convert cat to 5 coins instead TODO possible bug with coin count
+            }
+            req.user.save((err) => {
+                if (err) {
+                    throw err;
+                }
+                res.render('gacha-roll', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+            });
         });
-    });
+    }
 });
 
 // post to gacha roll page, where players can name a new cat they just rolled

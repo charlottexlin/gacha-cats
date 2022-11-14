@@ -2,6 +2,8 @@
     <h1>Gacha Cats!</h1>
     {{#if user}}
         <h3>Player: {{user.username}}</h3>
+        <h3>Level: {{user.playerLevel}} </h3>
+        <h3>Win streak: {{user.winStreak}}</h3>
         <a href="/collection">Collection</a>
         <a href="/battle">Battle</a>
         <a href="/gacha">Gacha</a
