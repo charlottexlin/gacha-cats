@@ -1,4 +1,9 @@
 <br>
+{{#if errorMsg}}
+<div class="error">
+    {{ errorMsg }}
+</div>
+{{/if}}
 <img src={{rolledCat.image}} width="100" height="115">
 <div id="rolledCatInfo">
     <h1>{{rolledCat.defaultName}}</h1>

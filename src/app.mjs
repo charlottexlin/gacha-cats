@@ -11,6 +11,8 @@ import {getGachaRoll} from './gacha.mjs';
 import {getOpponent, getRandomOpponent} from './opponentProfiles.mjs';
 import {battleRound, createOpponent} from './battle.mjs';
 
+// ---------- APP SET UP AND MIDDLEWARE REGISTRATION ----------
+// set up express app
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,7 +21,7 @@ const __dirname = path.dirname(__filename);
 const Player = mongoose.model('Player');
 const Cat = mongoose.model('Cat');
 
-// globals (TODO?)
+// globals
 let rolledCat = {};
 let chosenCat = {};
 let currentOpponent = {};
@@ -34,7 +36,8 @@ app.use(express.urlencoded({extended: false}));
 // static file serving middleware
 app.use(express.static(path.join(__dirname, 'public')));
 
-// set up session support [REFERENCE: memorystore documentation https://www.npmjs.com/package/memorystore]
+// set up session support
+// REFERENCE: memorystore documentation [https://www.npmjs.com/package/memorystore]
 const Store = memoryStore(session);
 app.use(session({
     cookie: { maxAge: 86400000 },
@@ -71,29 +74,39 @@ app.get('/register', (req, res) => {
     res.render('register');
 });
 
-// register a new player [REFERENCE: Professor Versoza's slides on Passport.js https://cs.nyu.edu/courses/fall22/CSCI-UA.0467-001/_site/slides/16/auth.html#/ and Passport.js documentation https://www.passportjs.org/docs/]
+// register a new player
+// REFERENCE: Professor Versoza's slides on Passport.js [https://cs.nyu.edu/courses/fall22/CSCI-UA.0467-001/_site/slides/16/auth.html#/]
+// REFERENCE: Passport.js documentation [https://www.passportjs.org/docs/]
 app.post('/register', (req, res, next) => {
-    // create a new player in the database
-    Player.register(new Player({
-        username: req.body.username,
-        winStreak: 0,
-        coins: 1000, // TODO temporary for testing
-        fish: 0,
-        playerLevel: 1,
-        battleCounter: 0,
-        cats: [],
-        currentOpponent: getOpponent('Mr Test') // TODO temporary for testing
-    }), req.body.password, (err, player) => {
-        if (err) {
-            console.log("ERROR", err);
-            res.render('register', {message: 'Error registering'}); // render an error on the register page TODO make error message more specific (e.g. username already taken)
-        } else {
-            passport.authenticate('local', {
-                successRedirect: '/collection', // redirect to collection page if registration is successful
-                failureRedirect: '/register', // redirect back to register page if unsuccessful
-            })(req, res, next);
-        }
-    });
+    // ensure that username is between 5 - 20 characters, and that password is 8 or more characters
+    if (req.body.username.length < 5) {
+        res.render('register', {errorMsg: 'Username must be at least 5 characters long.'});
+    } else if (req.body.username.length > 20) {
+        res.render('register', {errorMsg: 'Username can not be longer than 20 characters.'});
+    } else if (req.body.password.length < 8) {
+        res.render('register', {errorMsg: 'Password must be at least 8 characters long.'});
+    } else {
+        // if everything's good, create a new player with blank stats in the database
+        Player.register(new Player({
+            username: req.body.username,
+            winStreak: 0,
+            coins: 1000, // TODO temporary for testing
+            fish: 0,
+            playerLevel: 1,
+            battleCounter: 0,
+            cats: [],
+            currentOpponent: getOpponent('Cheesy'), // All new players start by facing off with Cheesy
+        }), req.body.password, (err) => {
+            if (err) { // Error registering player
+                res.render('register', {errorMsg: 'This username is already in use.'});
+            } else { // Success registering player
+                passport.authenticate('local', {
+                    successRedirect: '/collection', // redirect to collection page if registration is successful
+                    failureRedirect: '/register', // redirect back to register page if unsuccessful
+                })(req, res, next);
+            }
+        });
+    }
 });
 
 // login page, where returning players can log into an existing account
@@ -104,19 +117,33 @@ app.get('/login', (req, res) => {
 // allow player to log into an existing account
 app.post('/login', (req, res, next) => {
     passport.authenticate('local', (err, player) => {
-        if (player) {
+        if (err) { // Error authenticating
+            res.render('login', {errorMsg: 'Log in failed. Please try again.'});
+        }
+        if (player) { // Successfully authenticated player, now log them in
             req.logIn(player, (err) => {
                 if (!err) {
                     res.redirect('/collection');
                 }
             });
-        } else {
-            res.render('login', {message: 'Account not found'});
+        } else { // Account not found
+            res.render('login', {errorMsg: 'Account not found.'});
         }
     })(req, res, next);
 });
 
-// collection page, where players can view the cats they currently have
+// allow player to log out of currently logged-in account
+// REFERENCE: passport JS documentation [https://www.passportjs.org/concepts/authentication/logout/]
+app.post('/logout', function(req, res){
+    req.logout((err) => {
+        if (err) {
+            res.send('Error logging out');
+        }
+        res.redirect('/');
+    });
+});
+
+// collection page, where logged-in players can view the cats they currently have
 app.get('/collection', (req, res) => {
     // redirect to homepage if not logged in
     if (!req.user) {
@@ -125,7 +152,7 @@ app.get('/collection', (req, res) => {
         // get the documents for each of this player's cats
         Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
             if (err) {
-                throw err;
+                res.render('collection', {errorMsg: 'Error displaying cats'});
             }
             // show collection page that lists all the player's cats
             if (docs.length === 0) {
@@ -149,7 +176,7 @@ app.get('/battle', (req, res) => {
         // get the documents for each of this player's cats
         Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
             if (err) {
-                throw err;
+                res.render('battle', {errorMsg: 'Error getting your cats'});
             }
             // show battle set-up page with dropdown options for all the player's cats
             if (docs.length === 0) {
@@ -161,15 +188,15 @@ app.get('/battle', (req, res) => {
     }
 });
 
-// player chooses which cat to use
+// player chooses which cat to use for the battle
 app.post('/battle', (req, res) => {
     Cat.findOne({name: req.body.chosenCat}, (err, cat) => {
         if (err) {
-            throw err;
+            res.render('battle', {errorMsg: 'Error finding your chosen cat'});
         }
         // Can not use a cat in battle if they are at 0 HP
         if (cat.currentHP <= 0) {
-            res.render('battle', {message: cat.name + " is at 0 HP and can not battle. Restore their HP by feeding them fish on the collection page."});
+            res.render('battle', {errorMsg: cat.name + " is at 0 HP and can not battle. Restore their HP by feeding them fish on the collection page."});
         } else {
             chosenCat = cat;
             battleRounds = 0;
@@ -288,22 +315,23 @@ app.get('/gacha', (req, res) => {
 app.get('/gacha/roll', (req, res) => {
     // player doesn't have enough coins left
     if (req.user.coins < 10) {
-        res.render('gacha', {message: "You don't have enough coins to roll. Battle to earn more coins!"});
+        res.render('gacha', {errorMsg: "You don't have enough coins to roll. Battle to earn more coins!"});
     } else {
-        req.user.coins -= 10; // costs 10 coins to roll TODO make sure the player has enough coins left, otherwise show a message
+        req.user.coins -= 10; // costs 10 coins to roll
         rolledCat = getGachaRoll(); // calculate the cat the player rolled
         Cat.findOne({player: req.user._id, fighterProfile: rolledCat}, (err, doc) => { // check if the player already has this cat
             let haveCat = false;
             if (err) {
-                throw err;
+                res.render('gacha', {errorMsg: 'Error checking if you already have this cat'});
             }
             if (doc) {
                 haveCat = true;
-                req.user.coins += 5; // convert cat to 5 coins instead TODO possible bug with coin count
+                req.user.coins += 5; // if player already has this cat, convert it to 5 coins and 2 fish instead
+                req.user.fish += 2;
             }
             req.user.save((err) => {
                 if (err) {
-                    throw err;
+                    res.render('gacha', {errorMsg: 'Error saving your coin and fish count'});
                 }
                 res.render('gacha-roll', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
             });
@@ -314,6 +342,7 @@ app.get('/gacha/roll', (req, res) => {
 // post to gacha roll page, where players can name a new cat they just rolled
 // TODO what if the player navigates away before hitting submit??? should they still get the cat in their collection??
 app.post('/gacha/roll', (req, res) => {
+    // create the new cat for this player to have
     const newCat = new Cat({
         player: req.user._id,
         name: req.body.name,
@@ -321,16 +350,17 @@ app.post('/gacha/roll', (req, res) => {
         currentHP: rolledCat.maxHP,
         battlesWon: 0
     });
+    // save the cat into the database
     newCat.save((err) => {
         if (err) {
-            throw err;
+            res.render('gacha-roll', {errorMsg: 'Error saving the new cat'});
         }
         req.user.cats.push(newCat._id);
         req.user.save((err) => {
             if (err) {
-                throw err;
+                res.render('gacha-roll', {errorMsg: "Error saving user's cat list"});
             }
-            res.redirect('/gacha');
+            res.redirect('/gacha'); // on success, go back to gacha page
         });
     });
 }); 

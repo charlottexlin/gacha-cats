@@ -6,6 +6,9 @@
             <h3>Level: {{user.playerLevel}} </h3>
             <h3>Win streak: {{user.winStreak}}</h3>
         </div>
+        <form method="POST" action="logout">
+            <input type="submit" value="Log out" id="logOutBtn">
+        </form>
         <div id="navBar">
             <a href="/collection">Collection</a>
             <a href="/battle">Battle</a>

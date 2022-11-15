@@ -1,4 +1,9 @@
 <br>
+{{#if errorMsg}}
+<div class="error">
+    {{ errorMsg }}
+</div>
+{{/if}}
 {{#if noCats}}
 <h2>You don't have any cats in your collection yet. Roll on the gacha to get new cats!</h2>
 {{/if}}
