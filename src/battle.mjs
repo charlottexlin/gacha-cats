@@ -11,6 +11,7 @@ export function createOpponent(opponentProfile) {
 // Runs one round of a battle between the two given fighters (NOT profiles)
 export function battleRound(cat, opponent) { // TODO add front end stuff
     let continueBattle = true;
+    let winner = '';
 
     // Cat attacks opponent
     opponent.currentHP -= calculateAttack(cat.fighterProfile.critRate, cat.fighterProfile.powerLevel); // TODO some display
@@ -20,19 +21,20 @@ export function battleRound(cat, opponent) { // TODO add front end stuff
     // Battle ends either one runs out of HP
     if (opponent.currentHP <= 0) {
         opponent.currentHP = 0;
+        winner = 'cat';
         continueBattle = false;
     }
     else if (cat.currentHP <= 0) {
         cat.currentHP = 0;
+        winner = 'opponent';
         continueBattle = false;
     }
     
-    return continueBattle;
+    return {continueBattle: continueBattle, winner: winner}
 }
 
 // Return the damage a fighter does, damage is random and scaled off the fighter's power level
 function calculateAttack(critRate, powerLevel) {
-    console.log(1-critRate); // TODO
     const isCrit = chance.weighted([true, false], [critRate, 1-critRate]);
     // critical hit - attack is double the power level
     if (isCrit === true) { // TODO maybe show some display

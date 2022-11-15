@@ -1,10 +1,16 @@
 <head>
     <img src="/img/logo.png" alt="Gacha Cats!" width="286px" height="200px">
     {{#if user}}
-        <h3>Player: {{user.username}}</h3>
-        <a href="/collection">Collection</a>
-        <a href="/battle">Battle</a>
-        <a href="/gacha">Gacha</a
+        <div id="playerInfo">
+            <h3>Player: {{user.username}}</h3>
+            <h3>Level: {{user.playerLevel}} </h3>
+            <h3>Win streak: {{user.winStreak}}</h3>
+        </div>
+        <div id="navBar">
+            <a href="/collection">Collection</a>
+            <a href="/battle">Battle</a>
+            <a href="/gacha">Gacha</a
+        </div>
     {{/if}}
 </head>
 <body>

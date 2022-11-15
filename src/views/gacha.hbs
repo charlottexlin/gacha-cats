@@ -1,3 +1,10 @@
 <br>
-<a href="/gacha/roll">ROLL!! (10 coins)</a>
+{{#if message}}
+<div class="error">
+    {{ message }}
+</div>
+{{/if}}
+<div id="gachaRollLink">
+    <a href="/gacha/roll">ROLL!! (10 coins)</a>
+</div>
 <div>You currently have {{coins}} coins.</div>

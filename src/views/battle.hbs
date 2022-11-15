@@ -1,12 +1,22 @@
 <h2>Battle set up</h2>
-<h3>The current opponent is...</h3>
-<h3 id="opponentName">{{opponent.fighterProfile.defaultName}}</h3>
-<form id="startBattleForm" method="POST" action="battle">
+<div id="currentOpponentInfo">
+	<h3>The current opponent is...</h3>
+	<h3 id="opponentName">{{opponent.fighterProfile.defaultName}}</h3>
+</div>
+{{#if noCats}}
+<h2>You don't have any cats to battle with yet. Roll on the gacha to get new cats!</h2>
+{{else}}
+{{#if message}}
+<div class="error">
+	{{ message }}
+</div>
+{{/if}}
+<form method="POST" action="battle">
 	<div>
 		<label for="chosenCat">Choose your fighter:</label>
         <select name="chosenCat">
             {{#each cats as |cat|}}
-                <option value={{cat.name}}>{{cat.name}}</option>
+                <option value="{{cat.name}}">{{cat.name}}</option>
             {{/each}}
         </select>
 	</div>
@@ -14,3 +24,4 @@
 		<input type="submit" value="Begin battle">
 	</div>
 </form>
+{{/if}}

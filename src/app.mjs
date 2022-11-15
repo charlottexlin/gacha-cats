@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 import './db.mjs';
 import './auth.mjs';
 import {getGachaRoll} from './gacha.mjs';
-import {getOpponent} from './opponentProfiles.mjs';
+import {getOpponent, getRandomOpponent} from './opponentProfiles.mjs';
 import {battleRound, createOpponent} from './battle.mjs';
 
 const app = express();
@@ -19,10 +19,11 @@ const __dirname = path.dirname(__filename);
 const Player = mongoose.model('Player');
 const Cat = mongoose.model('Cat');
 
-// global (TODO?)
+// globals (TODO?)
 let rolledCat = {};
 let chosenCat = {};
 let currentOpponent = {};
+let battleRounds = 0;
 
 // use handlebars
 app.set("view engine", "hbs");
@@ -79,12 +80,13 @@ app.post('/register', (req, res, next) => {
         coins: 1000, // TODO temporary for testing
         fish: 0,
         playerLevel: 1,
+        battleCounter: 0,
         cats: [],
         currentOpponent: getOpponent('Mr Test') // TODO temporary for testing
     }), req.body.password, (err, player) => {
         if (err) {
             console.log("ERROR", err);
-            res.render('register', {message: 'ERROR!!!!!!'}); // render an error on the register page TODO make error message more specific
+            res.render('register', {message: 'Error registering'}); // render an error on the register page TODO make error message more specific (e.g. username already taken)
         } else {
             passport.authenticate('local', {
                 successRedirect: '/collection', // redirect to collection page if registration is successful
@@ -116,27 +118,47 @@ app.post('/login', (req, res, next) => {
 
 // collection page, where players can view the cats they currently have
 app.get('/collection', (req, res) => {
-    // get the documents for each of this player's cats
-    Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
-        if (err) {
-            throw err;
-        }
-        res.render('collection', {cats: docs}); 
-    });
+    // redirect to homepage if not logged in
+    if (!req.user) {
+        res.redirect('/');
+    } else {
+        // get the documents for each of this player's cats
+        Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
+            if (err) {
+                throw err;
+            }
+            // show collection page that lists all the player's cats
+            if (docs.length === 0) {
+                res.render('collection', {noCats: true, cats: docs});
+            } else {
+                res.render('collection', {noCats: false, cats: docs});
+            }
+        });
+    }
 });
 
 // battle start page, where players can set up a battle
 app.get('/battle', (req, res) => {
-    // create opponent
-    currentOpponent = createOpponent(req.user.currentOpponent);
+    // redirect to homepage if not logged in
+    if (!req.user) {
+        res.redirect('/');
+    } else {
+        // create opponent
+        currentOpponent = createOpponent(req.user.currentOpponent);
 
-    // get the documents for each of this player's cats
-    Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
-        if (err) {
-            throw err;
-        }
-        res.render('battle', {opponent: currentOpponent, cats: docs});
-    });
+        // get the documents for each of this player's cats
+        Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
+            if (err) {
+                throw err;
+            }
+            // show battle set-up page with dropdown options for all the player's cats
+            if (docs.length === 0) {
+                res.render('battle', {opponent: currentOpponent, noCats: true, cats: docs});
+            } else {
+                res.render('battle', {opponent: currentOpponent, noCats: false, cats: docs});
+            }
+        });
+    }
 });
 
 // player chooses which cat to use
@@ -145,50 +167,148 @@ app.post('/battle', (req, res) => {
         if (err) {
             throw err;
         }
-        chosenCat = cat;
-        res.redirect('/battle/fight');
+        // Can not use a cat in battle if they are at 0 HP
+        if (cat.currentHP <= 0) {
+            res.render('battle', {message: cat.name + " is at 0 HP and can not battle. Restore their HP by feeding them fish on the collection page."});
+        } else {
+            chosenCat = cat;
+            battleRounds = 0;
+            res.redirect('/battle/fight');
+        }
     });
 })
 
 // battle fight page, where players can fight an opponent
-app.get('/battle/fight', (req, res) => {
-    if (battleRound(chosenCat, currentOpponent) == true) { // TODO what about first round
+app.get('/battle/fight', (req, res) => { // TODO this should maybe not be a "gettable" route. will update
+    // first round of battle
+    if (battleRounds === 0) {
         res.render('battle-fight', {opponent: currentOpponent, cat: chosenCat});
-    } // TODO should I just do this client-side? should this send back code for the broswer to run somehow????? instead of using render (battle-fight), could run a client-side script to change DOM...?
-    // can we move some of the files to the client-side and then have the server send JSONs to the browser that stores the data it needs - for example catProfiles.cats and opponentProfiles.getOpponent and
-    // whatever all the other logic could be sent through JSON maybe??? I don't really know how to do that. maybe i'll think about it later? i don't know
-    // i just think using an attack button that just reconfigures the UI (and runs some code behind the scenes??) would make more sense but i dont want to put ALL my code on the client side
-    else {
-        currentOpponent = {}; // TODO get a new randomized currentOpponent
-        res.redirect('/collection'); // TODO if the battle ends, stats such as battlesWon should be updated, redirect to win or lose screen, add to coins and fish etc, and remove curent opponent
+        battleRounds++;
     }
-})
+    // subsequent rounds
+    else {
+        // battle is ongoing
+        battleRounds++;
+        const roundResults = battleRound(chosenCat, currentOpponent);
+        if (roundResults.continueBattle) {
+            res.render('battle-fight', {opponent: currentOpponent, cat: chosenCat});
+        }
+        // battle has ended, we have a winner
+        else {
+            battleEnd(req, res, roundResults.winner);
+        }
+    }
+});
+
+// helper function that does all necessary updates after a battle ends
+async function battleEnd(req, res, winner) {
+    // update cat's current HP and battles won
+    const cat = await Cat.findOne({name: chosenCat.name});
+    cat.currentHP = chosenCat.currentHP;
+    if (winner === 'cat') {
+        cat.battlesWon++;
+    }
+    await cat.save();
+    // player's cat won
+    if (winner === 'cat') {
+        // Give player coins and fish, amount is based on level of current opponent
+        const opponentLevel = currentOpponent.fighterProfile.powerLevel;
+        let fish = 0;
+        let coins = 0;
+        switch (opponentLevel) {
+            case 4:
+                coins = 10;
+                fish = 4;
+                break;
+            case 5:
+                coins = 15;
+                fish = 7;
+                break;
+            case 7:
+                coins = 20;
+                fish = 12;
+                break;
+            case 8:
+                coins = 25;
+                fish = 15;
+                break;
+            case 9:
+                coins = 30;
+                fish = 18;
+                break;
+            case 10:
+                coins = 35;
+                fish = 22;
+                break;
+            case 20:
+                coins = 100;
+                fish = 50;
+                break;
+        }
+        // update player's win streak
+        req.user.winStreak++;
+        // update player's battle counter, and possibly level
+        if (req.user.battleCounter + 1 === 10) { // reached the next level
+            req.user.playerLevel++; // TODO possibly show a message on level up??
+            req.user.battleCounter = 0; // reset battle counter
+        } else {
+            req.user.battleCounter++;
+        }
+        // Get a new current opponent for the player
+        const randomOpponent = getRandomOpponent();
+        req.user.currentOpponent = randomOpponent;
+        await req.user.save();
+        // Set global
+        currentOpponent = randomOpponent;
+        // show win screen
+        res.render('battle-win', {fish: fish, coins: coins});
+    }
+    // opponent won
+    else if (winner === 'opponent') {
+        // update player's win streak
+        if (req.user.winStreak > 0) {
+            req.user.winStreak = 0;
+        }
+        // show lose screen
+        res.render('battle-lose');
+    }
+}
 
 // gacha page, where players can roll on the gacha
 app.get('/gacha', (req, res) => {
-    res.render('gacha', {coins: req.user.coins});
+    // redirect to homepage if not logged in
+    if (!req.user) {
+        res.redirect('/');
+    } else {
+        res.render('gacha', {coins: req.user.coins});
+    }
 });
 
 // gacha roll page, where players can see what cat they rolled
 app.get('/gacha/roll', (req, res) => {
-    req.user.coins -= 10; // costs 10 coins to roll TODO make sure the player has enough coins left, otherwise show a message
-    rolledCat = getGachaRoll(); // calculate the cat the player rolled
-    Cat.findOne({player: req.user._id, fighterProfile: rolledCat}, (err, doc) => { // check if the player already has this cat
-        let haveCat = false;
-        if (err) {
-            throw err;
-        }
-        if (doc) {
-            haveCat = true;
-            req.user.coins += 5; // convert cat to 5 coins instead TODO possible bug with coin count
-        }
-        req.user.save((err) => {
+    // player doesn't have enough coins left
+    if (req.user.coins < 10) {
+        res.render('gacha', {message: "You don't have enough coins to roll. Battle to earn more coins!"});
+    } else {
+        req.user.coins -= 10; // costs 10 coins to roll TODO make sure the player has enough coins left, otherwise show a message
+        rolledCat = getGachaRoll(); // calculate the cat the player rolled
+        Cat.findOne({player: req.user._id, fighterProfile: rolledCat}, (err, doc) => { // check if the player already has this cat
+            let haveCat = false;
             if (err) {
                 throw err;
             }
-            res.render('gacha-roll', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+            if (doc) {
+                haveCat = true;
+                req.user.coins += 5; // convert cat to 5 coins instead TODO possible bug with coin count
+            }
+            req.user.save((err) => {
+                if (err) {
+                    throw err;
+                }
+                res.render('gacha-roll', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+            });
         });
-    });
+    }
 });
 
 // post to gacha roll page, where players can name a new cat they just rolled
@@ -197,7 +317,7 @@ app.post('/gacha/roll', (req, res) => {
     const newCat = new Cat({
         player: req.user._id,
         name: req.body.name,
-        fighterProfile: rolledCat, // TODO maybe should find a better way to do this than using a global?? Don't know yet
+        fighterProfile: rolledCat,
         currentHP: rolledCat.maxHP,
         battlesWon: 0
     });
