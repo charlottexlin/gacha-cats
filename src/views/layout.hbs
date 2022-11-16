@@ -1,18 +1,31 @@
 <head>
     <link rel="stylesheet" href="/css/styles.css" media="screen">
     <div class="container-fluid text-center">
-        <img src="/img/logo.png" alt="Gacha Cats!" class="img-fluid">
+        <div class="row justify-content-md-center">
+            <div class="col col-lg-4"></div>
+            <div class="col col-lg-4">
+                <img src="/img/logo.png" alt="Gacha Cats!" class="img-fluid">
+            </div>
+            <div class="col col-lg-1 mt-5">
+                {{#if user}}
+                    <form method="POST" action="logout">
+                        <input type="submit" value="Log out" id="logOutBtn">
+                    </form>
+                {{/if}}
+            </div>
+            <div class="col col-lg-3 my-auto"></div>
+        </div>
         {{#if user}}
-            <div>
-                <p>{{user.username}}</p>
-                <p>Level {{user.playerLevel}}</p>
-                <p>Win streak: {{user.winStreak}}</p>
-            </div>
-            <div>
-                <form method="POST" action="logout">
-                    <input type="submit" value="Log out" id="logOutBtn">
-                </form>
-            </div>
+            <div class="row justify-content-md-center">
+                <div class="col col-lg-2">
+                    <p class="h2">{{user.username}}</p>
+                </div>
+                <div class="col col-lg-2">
+                    <p class="h2">Level {{user.playerLevel}}</p>
+                </div>
+                <div class="col col-lg-2">
+                    <p class="h2">Win streak: {{user.winStreak}}</p>
+                </div>
             <nav class="nav justify-content-center">
                 <a href="/collection" class="nav-item nav-link">Collection</a>
                 <a href="/battle" class="nav-item nav-link">Battle</a>
