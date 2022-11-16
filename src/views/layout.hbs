@@ -1,20 +1,25 @@
 <head>
-    <img src="/img/logo.png" alt="Gacha Cats!" width="286px" height="200px">
-    {{#if user}}
-        <div id="playerInfo">
-            <h3>Player: {{user.username}}</h3>
-            <h3>Level: {{user.playerLevel}} </h3>
-            <h3>Win streak: {{user.winStreak}}</h3>
-        </div>
-        <form method="POST" action="logout">
-            <input type="submit" value="Log out" id="logOutBtn">
-        </form>
-        <div id="navBar">
-            <a href="/collection">Collection</a>
-            <a href="/battle">Battle</a>
-            <a href="/gacha">Gacha</a
-        </div>
-    {{/if}}
+    <link rel="stylesheet" href="/css/styles.css" media="screen">
+    <div class="container-fluid text-center">
+        <img src="/img/logo.png" alt="Gacha Cats!" class="img-fluid">
+        {{#if user}}
+            <div>
+                <p>{{user.username}}</p>
+                <p>Level {{user.playerLevel}}</p>
+                <p>Win streak: {{user.winStreak}}</p>
+            </div>
+            <div>
+                <form method="POST" action="logout">
+                    <input type="submit" value="Log out" id="logOutBtn">
+                </form>
+            </div>
+            <nav class="nav justify-content-center">
+                <a href="/collection" class="nav-item nav-link">Collection</a>
+                <a href="/battle" class="nav-item nav-link">Battle</a>
+                <a href="/gacha" class="nav-item nav-link">Gacha</a>
+            </nav>
+        {{/if}}
+    </div>
 </head>
 <body>
     {{{body}}}

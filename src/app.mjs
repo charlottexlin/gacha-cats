@@ -73,7 +73,7 @@ app.get('/', (req, res) => {
 
 // registration page, where new players can make an account
 app.get('/register', (req, res) => {
-    res.render('register');
+    res.render('login', {pageName: 'Register', action: 'register'});
 });
 
 // register a new player
@@ -83,13 +83,13 @@ app.post('/register', (req, res, next) => {
     // ensure that username is between 5 - 20 characters and contains no special characters, and that password is 8 or more characters
     const username = req.body.username.trim();
     if (username.length < 5) {
-        res.render('register', {errorMsg: 'Username must be at least 5 characters long.'});
+        res.render('login', {errorMsg: 'Username must be at least 5 characters long.', pageName:'Register', action: 'register'});
     } else if (username.length > 20) {
-        res.render('register', {errorMsg: 'Username can not be longer than 20 characters.'});
+        res.render('login', {errorMsg: 'Username can not be longer than 20 characters.', pageName:'Register', action: 'register'});
     } else if (username.includes(' ') || [...specialChars].some(char => username.includes(char))) { // use of HOF some
-        res.render('register', {errorMsg: "Username can not include spaces or characters ~'`!@#$%^&*()+={}[]|\\/:;\"<>?,"});
+        res.render('login', {errorMsg: "Username can not include spaces or characters ~'`!@#$%^&*()+={}[]|\\/:;\"<>?,", pageName: 'Register', action: 'register'});
     } else if (req.body.password.length < 8) {
-        res.render('register', {errorMsg: 'Password must be at least 8 characters long.'});
+        res.render('login', {errorMsg: 'Password must be at least 8 characters long.', pageName: 'Register', action: 'register'});
     } else {
         // if everything's good, create a new player with blank stats in the database
         Player.register(new Player({
@@ -103,7 +103,7 @@ app.post('/register', (req, res, next) => {
             currentOpponent: getOpponent('Cheesy'), // All new players start by facing off with Cheesy
         }), req.body.password, (err) => {
             if (err) { // Error registering player
-                res.render('register', {errorMsg: 'This username is already in use.'});
+                res.render('login', {errorMsg: 'This username is already in use.', pageName: 'Register', action: 'register'});
             } else { // Success registering player
                 passport.authenticate('local', {
                     successRedirect: '/collection', // redirect to collection page if registration is successful
@@ -116,14 +116,14 @@ app.post('/register', (req, res, next) => {
 
 // login page, where returning players can log into an existing account
 app.get('/login', (req, res) => {
-    res.render('login');
+    res.render('login', {pageName: 'Login', action: 'login'});
 });
 
 // allow player to log into an existing account
 app.post('/login', (req, res, next) => {
     passport.authenticate('local', (err, player) => {
         if (err) { // Error authenticating
-            res.render('login', {errorMsg: 'Log in failed. Please try again.'});
+            res.render('login', {errorMsg: 'Log in failed. Please try again.', pageName: 'Login', action: 'login'});
         }
         if (player) { // Successfully authenticated player, now log them in
             req.logIn(player, (err) => {
@@ -132,7 +132,7 @@ app.post('/login', (req, res, next) => {
                 }
             });
         } else { // Account not found
-            res.render('login', {errorMsg: 'Account not found.'});
+            res.render('login', {errorMsg: 'Account not found - did you enter the wrong username or password?', pageName: 'Login', action: 'login'});
         }
     })(req, res, next);
 });

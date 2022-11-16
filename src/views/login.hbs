@@ -1,19 +1,21 @@
-<h2>Login</h2>
-{{#if errorMsg}}
-<div class="error">
-	{{ errorMsg }}
+<div class="container-fluid text-center">
+		<h1>{{pageName}}</h1>
+	{{#if errorMsg}}
+	<div class="error">
+		{{ errorMsg }}
+	</div>
+	{{/if}}
+	<form method="POST" action="{{action}}">
+		<div>
+			<label for="username">Username:</label>
+			<input type="text" name="username" value="">
+		</div>
+		<div>
+			<label for="password">Password:</label> 
+			<input type="password" name="password" value="">
+		</div>
+		<div>
+			<input type="submit" value="{{pageName}}">
+		</div>
+	</form>
 </div>
-{{/if}}
-<form method="POST" action="login">
-	<div>
-		<label for="username">Username:</label>
-		<input type="text" name="username" value="">
-	</div>
-	<div>
-		<label for="password">Password:</label> 
-		<input type="password" name="password" value="">
-	</div>
-	<div>
-		<input type="submit" value="Login">
-	</div>
-</form>
