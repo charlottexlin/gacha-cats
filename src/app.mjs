@@ -10,6 +10,7 @@ import './auth.mjs';
 import {getGachaRoll} from './gacha.mjs';
 import {getOpponent, getRandomOpponent} from './opponentProfiles.mjs';
 import {battleRound, createOpponent} from './battle.mjs';
+import { cats } from './catProfiles.mjs';
 
 // ---------- APP SET UP AND MIDDLEWARE REGISTRATION ----------
 // set up express app
@@ -22,6 +23,7 @@ const Player = mongoose.model('Player');
 const Cat = mongoose.model('Cat');
 
 // globals
+const specialChars = "~'`!@#$%^&*()+={}[]|\\/:;\"<>?,";
 let rolledCat = {};
 let chosenCat = {};
 let currentOpponent = {};
@@ -78,17 +80,20 @@ app.get('/register', (req, res) => {
 // REFERENCE: Professor Versoza's slides on Passport.js [https://cs.nyu.edu/courses/fall22/CSCI-UA.0467-001/_site/slides/16/auth.html#/]
 // REFERENCE: Passport.js documentation [https://www.passportjs.org/docs/]
 app.post('/register', (req, res, next) => {
-    // ensure that username is between 5 - 20 characters, and that password is 8 or more characters
-    if (req.body.username.length < 5) {
+    // ensure that username is between 5 - 20 characters and contains no special characters, and that password is 8 or more characters
+    const username = req.body.username.trim();
+    if (username.length < 5) {
         res.render('register', {errorMsg: 'Username must be at least 5 characters long.'});
-    } else if (req.body.username.length > 20) {
+    } else if (username.length > 20) {
         res.render('register', {errorMsg: 'Username can not be longer than 20 characters.'});
+    } else if (username.includes(' ') || [...specialChars].some(char => username.includes(char))) { // use of HOF some
+        res.render('register', {errorMsg: "Username can not include spaces or characters ~'`!@#$%^&*()+={}[]|\\/:;\"<>?,"});
     } else if (req.body.password.length < 8) {
         res.render('register', {errorMsg: 'Password must be at least 8 characters long.'});
     } else {
         // if everything's good, create a new player with blank stats in the database
         Player.register(new Player({
-            username: req.body.username,
+            username: username,
             winStreak: 0,
             coins: 1000, // TODO temporary for testing
             fish: 0,
@@ -196,7 +201,7 @@ app.post('/battle', (req, res) => {
         }
         // Can not use a cat in battle if they are at 0 HP
         if (cat.currentHP <= 0) {
-            res.render('battle', {errorMsg: cat.name + " is at 0 HP and can not battle. Restore their HP by feeding them fish on the collection page."});
+            res.render('battle', {errorMsg: cat.name + " is at 0 HP and can not battle. Restore their HP by feeding them fish on the collection page.", opponent: currentOpponent, noCats: false, cats: docs});
         } else {
             chosenCat = cat;
             battleRounds = 0;
@@ -315,7 +320,7 @@ app.get('/gacha', (req, res) => {
 app.get('/gacha/roll', (req, res) => {
     // player doesn't have enough coins left
     if (req.user.coins < 10) {
-        res.render('gacha', {errorMsg: "You don't have enough coins to roll. Battle to earn more coins!"});
+        res.render('gacha', {errorMsg: "You don't have enough coins to roll. Battle to earn more coins!", coins: req.user.coins});
     } else {
         req.user.coins -= 10; // costs 10 coins to roll
         rolledCat = getGachaRoll(); // calculate the cat the player rolled
@@ -333,7 +338,9 @@ app.get('/gacha/roll', (req, res) => {
                 if (err) {
                     res.render('gacha', {errorMsg: 'Error saving your coin and fish count'});
                 }
-                res.render('gacha-roll', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+                else {
+                    res.render('gacha-roll', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+                }
             });
         });
     }
@@ -342,27 +349,46 @@ app.get('/gacha/roll', (req, res) => {
 // post to gacha roll page, where players can name a new cat they just rolled
 // TODO what if the player navigates away before hitting submit??? should they still get the cat in their collection??
 app.post('/gacha/roll', (req, res) => {
-    // create the new cat for this player to have
-    const newCat = new Cat({
-        player: req.user._id,
-        name: req.body.name,
-        fighterProfile: rolledCat,
-        currentHP: rolledCat.maxHP,
-        battlesWon: 0
-    });
-    // save the cat into the database
-    newCat.save((err) => {
-        if (err) {
-            res.render('gacha-roll', {errorMsg: 'Error saving the new cat'});
-        }
-        req.user.cats.push(newCat._id);
-        req.user.save((err) => {
+    // ensure cat's name is not too long and doesn't have special characters
+    const catName = req.body.name.trim();
+    if (catName.length > 20) {
+        res.render('gacha-roll', {errorMsg: 'Cat name can not be longer than 20 characters', coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat});
+    } else if ([...specialChars].some(char => catName.includes(char))) {
+        res.render('gacha-roll', {errorMsg: "Cat name can not include characters ~'`!@#$%^&*()+={}[]|\\/:;\"<>?,", coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat});
+    } else {
+        // ensure cat's name is not a duplicate name
+        Cat.findOne({name: catName}, (err, doc) => {
             if (err) {
-                res.render('gacha-roll', {errorMsg: "Error saving user's cat list"});
+                res.render('gacha-roll', {errorMsg: "Error checking cat's name"});
             }
-            res.redirect('/gacha'); // on success, go back to gacha page
+            // already have a cat by this name
+            if (doc) {
+                res.render('gacha-roll', {errorMsg: 'You already have a cat by that name'});
+            } else { // all good
+                // create the new cat for this player to have
+                const newCat = new Cat({
+                    player: req.user._id,
+                    name: catName,
+                    fighterProfile: rolledCat,
+                    currentHP: rolledCat.maxHP,
+                    battlesWon: 0
+                });
+                // save the cat into the database
+                newCat.save((err) => {
+                    if (err) {
+                        res.render('gacha-roll', {errorMsg: 'Error saving the new cat'});
+                    }
+                    req.user.cats.push(newCat._id);
+                    req.user.save((err) => {
+                        if (err) {
+                            res.render('gacha-roll', {errorMsg: "Error saving user's cat list"});
+                        }
+                        res.redirect('/gacha'); // on success, go back to gacha page
+                    });
+                });
+            }
         });
-    });
+    }
 }); 
 
 app.listen(process.env.PORT || 3000);
