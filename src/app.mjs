@@ -352,9 +352,9 @@ app.post('/gacha/roll', (req, res) => {
     // ensure cat's name is not too long and doesn't have special characters
     const catName = req.body.name.trim();
     if (catName.length > 20) {
-        res.render('gacha-roll', {errorMsg: 'Cat name can not be longer than 20 characters', coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat});
+        res.render('gacha-roll', {errorMsg: 'Cat name can not be longer than 20 characters', coins: req.user.coins, rolledCat: rolledCat, haveCat: false});
     } else if ([...specialChars].some(char => catName.includes(char))) {
-        res.render('gacha-roll', {errorMsg: "Cat name can not include characters ~'`!@#$%^&*()+={}[]|\\/:;\"<>?,", coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat});
+        res.render('gacha-roll', {errorMsg: "Cat name can not include characters ~'`!@#$%^&*()+={}[]|\\/:;\"<>?,", coins: req.user.coins, rolledCat: rolledCat, haveCat: false});
     } else {
         // ensure cat's name is not a duplicate name
         Cat.findOne({name: catName}, (err, doc) => {
