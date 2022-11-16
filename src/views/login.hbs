@@ -7,15 +7,15 @@
 	{{/if}}
 	<form method="POST" action="{{action}}">
 		<div>
-			<label for="username">Username:</label>
-			<input type="text" name="username" value="">
+			<label for="username" class="form-label">Username</label>
+			<input type="text" name="username" value="" placeholder="Username" class="form-control">
 		</div>
 		<div>
-			<label for="password">Password:</label> 
-			<input type="password" name="password" value="">
+			<label for="password" class="form-label">Password</label> 
+			<input type="password" name="password" value="" placeholder="Password" class="form-control">
 		</div>
 		<div>
-			<input type="submit" value="{{pageName}}">
+			<input type="submit" value="{{pageName}}" class="btn btn-primary">
 		</div>
 	</form>
 </div>

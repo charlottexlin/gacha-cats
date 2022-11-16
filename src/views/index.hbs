@@ -1,9 +1,9 @@
-<h3>Welcome! Register or log in to start battling!</h3>
-{{#unless user}}
-    <div id="registrationLink">
-        <a href="/register">Register (for new players)</a>
-    </div>
-    <div id="loginLink">
-        <a href="/login">Login (for returning players)</a>
-    </div>
-{{/unless}}
+<div class="container-fluid text-center">
+    <p class="h1">Welcome!</p>
+    <p class="h3">Register or log in to start battling!</p>
+    {{#unless user}}
+        <a href="/register" class="btn btn-primary">Register</a>
+        <br>
+        <a href="/login" class="btn btn-primary mt-3">Login</a>
+    {{/unless}}
+</div>
