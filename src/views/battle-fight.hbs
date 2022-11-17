@@ -1,5 +1,15 @@
-<div id="catInfo">{{cat.name}} - HP: {{cat.currentHP}}</div>
-<div id="opponentInfo">{{opponent.fighterProfile.defaultName}} - HP: {{opponent.currentHP}}</div>
-<div id="attackLink">
-    <a href="/battle/fight">ATTACK!</href>
+<div class="row justify-content-md-center">
+    <div class="col col-lg-3">
+        <img src="{{cat.fighterProfile.image}}" alt="Your cat" class="img-fluid">
+        <p class="h2">{{cat.name}}</p>
+        <p class="h3">{{cat.fighterProfile.subtitle}}</p>
+        <p class="h3">❤️ {{cat.currentHP}}</p>
+    </div>
+    <div class="col col-lg-3">
+        <img src="{{opponent.fighterProfile.image}}" alt="Opponent" class="img-fluid">
+        <p class="h2">{{opponent.fighterProfile.defaultName}}</p>
+        <p class="h3">{{opponent.fighterProfile.subtitle}}</p>
+        <p class="h3">❤️ {{opponent.currentHP}}</p>
+    </div>
 </div>
+<a href="/battle/fight" class="btn btn-primary">ATTACK!</href>
