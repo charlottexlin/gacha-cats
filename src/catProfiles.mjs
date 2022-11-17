@@ -23,7 +23,7 @@ export const cats = [
     new FighterProfile("Shelly", "Sophisticated sweetie", "cat", "/img/test.png", 70, 6, 0.06, "uncommon", uncommonPercentage),
     // rare cats
     new FighterProfile("Mr. Big Paws", "Humongous harbinger", "cat", "/img/test.png", 80, 8, 0.07, "rare", rarePercentage),
-    new FighterProfile("Beanie", "Beguiling beauty", "cat", "/img/test.png", 80, 8, "rare", 0.08, rarePercentage),
+    new FighterProfile("Beanie", "Beguiling beauty", "cat", "/img/test.png", 80, 8, 0.08, "rare", rarePercentage),
     // legendary cats
     new FighterProfile("Tony", "Might just be a tiger", "cat", "/img/test.png", 80, 11, 0.1, "legendary", legendaryPercentage),
     new FighterProfile("Prisma", "Elusive elegance", "cat", "/img/test.png", 100, 10, 0.15, "legendary", legendaryPercentage),

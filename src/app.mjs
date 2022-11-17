@@ -317,7 +317,7 @@ app.get('/gacha', (req, res) => {
 });
 
 // gacha roll page, where players can see what cat they rolled
-app.get('/gacha/roll', (req, res) => {
+app.get('/gacha/roll', (req, res) => { // TODO also shoudln't be gettable
     // player doesn't have enough coins left
     if (req.user.coins < 10) {
         res.render('gacha', {errorMsg: "You don't have enough coins to roll. Battle to earn more coins!", coins: req.user.coins});
@@ -347,7 +347,6 @@ app.get('/gacha/roll', (req, res) => {
 });
 
 // post to gacha roll page, where players can name a new cat they just rolled
-// TODO what if the player navigates away before hitting submit??? should they still get the cat in their collection??
 app.post('/gacha/roll', (req, res) => {
     // ensure cat's name is not too long and doesn't have special characters
     const catName = req.body.name.trim();

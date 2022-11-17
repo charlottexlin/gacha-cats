@@ -9,7 +9,7 @@
             <div class="col col-lg-1 mt-5">
                 {{#if user}}
                     <form method="POST" action="logout">
-                        <input type="submit" value="Log out" class="btn btn-primary">
+                        <input type="submit" value="Log out" class="btn btn-secondary">
                     </form>
                 {{/if}}
             </div>
@@ -26,10 +26,10 @@
                 <div class="col col-lg-2">
                     <p class="h2">Win streak: {{user.winStreak}}</p>
                 </div>
-            <nav class="nav justify-content-center">
-                <a href="/collection" class="nav-item nav-link">Collection</a>
-                <a href="/battle" class="nav-item nav-link">Battle</a>
-                <a href="/gacha" class="nav-item nav-link">Gacha</a>
+            <nav class="nav justify-content-center my-3">
+                <a href="/collection" class="nav-item btn btn-primary mx-3">Collection</a>
+                <a href="/battle" class="nav-item btn btn-primary mx-3">Battle</a>
+                <a href="/gacha" class="nav-item btn btn-primary mx-3">Gacha</a>
             </nav>
         {{/if}}
     </div>
