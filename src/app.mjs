@@ -342,6 +342,11 @@ app.post('/battle/lose', (req, res) => {
     }
 });
 
+// return to battle set up page after winning
+app.post('/battle/win', (req, res) => {
+    res.redirect('/battle');
+});
+
 // gacha page, where players can roll on the gacha
 app.get('/gacha', (req, res) => {
     // redirect to homepage if not logged in
