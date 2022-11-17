@@ -33,7 +33,7 @@ const opponents = [
     new FighterProfile("Void", "???", "opponent", "/img/test.png", 70, 20, 0.11, "legendary", legendaryPercentage),
 ];
 
-// Get an opponent based on its name
+// Get an opponent profile based on its name
 export function getOpponent(name) {
     let match = {};
     opponents.forEach((opponent) => {

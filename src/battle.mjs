@@ -24,7 +24,7 @@ export function battleRound(cat, opponent) { // TODO add front end stuff
         winner = 'cat';
         continueBattle = false;
     }
-    else if (cat.currentHP <= 0) {
+    if (cat.currentHP <= 0) {
         cat.currentHP = 0;
         winner = 'opponent';
         continueBattle = false;

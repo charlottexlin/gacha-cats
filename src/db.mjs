@@ -21,7 +21,7 @@ const CatSchema = new mongoose.Schema({
     player: {type: mongoose.Schema.Types.ObjectId, ref: 'Player'}, // a reference to the Player to which this Cat belongs
     name: {type: String, required: true}, // name that the player chose for this cat
     fighterProfile: {type: Object, required: true}, // a reference to a FighterProfile object, which holds the immutable properties of this cat
-    currentHP: {type: Number, min: 0, required: true}, // increases if a fish is used on this Cat, decreases in battle
+    currentHP: {type: Number, required: true}, // increases if a fish is used on this Cat, decreases in battle
     battlesWon: {type: Number, min: 0, required: true} // how many battles this Cat has won
 });
 

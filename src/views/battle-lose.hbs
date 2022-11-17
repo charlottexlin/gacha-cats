@@ -1,3 +1,10 @@
-YOU LOST
-
-TODO: button with attached script?
+<div class="container-fluid text-center">
+    <p class="h1">You lost!<p>
+    <form method="POST" action="lose">
+        <input type="radio" name="postBattle" value="tryAgain">
+        <label for="tryAgain">Try again</label><br>
+        <input type="radio" name="postBattle" value="giveUp">
+        <label for="giveUp">Give up</label><br>
+        <input type="submit" value="Back to battle setup" class="btn btn-secondary">
+    </form>
+</div>

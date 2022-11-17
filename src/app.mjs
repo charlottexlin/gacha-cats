@@ -10,7 +10,6 @@ import './auth.mjs';
 import {getGachaRoll} from './gacha.mjs';
 import {getOpponent, getRandomOpponent} from './opponentProfiles.mjs';
 import {battleRound, createOpponent} from './battle.mjs';
-import { cats } from './catProfiles.mjs';
 
 // ---------- APP SET UP AND MIDDLEWARE REGISTRATION ----------
 // set up express app
@@ -24,10 +23,10 @@ const Cat = mongoose.model('Cat');
 
 // globals
 const specialChars = "~'`!@#$%^&*()+={}[]|\\/:;\"<>?,";
-let rolledCat = {};
-let chosenCat = {};
-let currentOpponent = {};
-let battleRounds = 0;
+let rolledCat = null;
+let chosenCat = null;
+let currentOpponent = null;
+let inBattle = false;
 
 // use handlebars
 app.set("view engine", "hbs");
@@ -73,6 +72,8 @@ app.get('/', (req, res) => {
 
 // registration page, where new players can make an account
 app.get('/register', (req, res) => {
+    chosenCat = null;
+    inBattle = false;
     res.render('login', {pageName: 'Register', action: 'register'});
 });
 
@@ -116,6 +117,8 @@ app.post('/register', (req, res, next) => {
 
 // login page, where returning players can log into an existing account
 app.get('/login', (req, res) => {
+    chosenCat = null;
+    inBattle = false;
     res.render('login', {pageName: 'Login', action: 'login'});
 });
 
@@ -175,7 +178,7 @@ app.get('/battle', (req, res) => {
     if (!req.user) {
         res.redirect('/');
     } else {
-        // create opponent
+        // create opponent TODO I want it to make a new opponent every time?
         currentOpponent = createOpponent(req.user.currentOpponent);
 
         // get the documents for each of this player's cats
@@ -194,40 +197,54 @@ app.get('/battle', (req, res) => {
 });
 
 // player chooses which cat to use for the battle
-app.post('/battle', (req, res) => {
+app.post('/battle', (req, res) => { // TODO adding a button to give up on the current opponent?
     Cat.findOne({name: req.body.chosenCat}, (err, cat) => {
         if (err) {
             res.render('battle', {errorMsg: 'Error finding your chosen cat'});
         }
         // Can not use a cat in battle if they are at 0 HP
         if (cat.currentHP <= 0) {
-            res.render('battle', {errorMsg: cat.name + " is at 0 HP and can not battle. Restore their HP by feeding them fish on the collection page.", opponent: currentOpponent, noCats: false, cats: docs});
+            // get the documents for each of this player's cats
+            Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
+                if (err) {
+                    res.render('battle', {errorMsg: 'Error getting your cats'});
+                }
+                // show battle set-up page with dropdown options for all the player's cats
+                if (docs.length === 0) {
+                    res.render('battle', {errorMsg: cat.name + " is at 0 HP and can not battle. Restore their HP by feeding them fish on the collection page.", opponent: currentOpponent, noCats: true, cats: docs});
+                } else {
+                    res.render('battle', {errorMsg: cat.name + " is at 0 HP and can not battle. Restore their HP by feeding them fish on the collection page.", opponent: currentOpponent, noCats: false, cats: docs});
+                }
+            });
         } else {
             chosenCat = cat;
-            battleRounds = 0;
             res.redirect('/battle/fight');
         }
     });
 })
 
 // battle fight page, where players can fight an opponent
-app.get('/battle/fight', (req, res) => { // TODO this should maybe not be a "gettable" route. will update
-    // first round of battle
-    if (battleRounds === 0) {
-        res.render('battle-fight', {opponent: currentOpponent, cat: chosenCat});
-        battleRounds++;
-    }
-    // subsequent rounds
-    else {
-        // battle is ongoing
-        battleRounds++;
-        const roundResults = battleRound(chosenCat, currentOpponent);
-        if (roundResults.continueBattle) {
+app.get('/battle/fight', (req, res) => {
+    // redirect to homepage if not logged in
+    if (!req.user || !chosenCat) {
+        res.redirect('/');
+    } else {
+        // first round of battle
+        if (!inBattle) {
             res.render('battle-fight', {opponent: currentOpponent, cat: chosenCat});
+            inBattle = true;
         }
-        // battle has ended, we have a winner
+        // subsequent rounds
         else {
-            battleEnd(req, res, roundResults.winner);
+            // battle is ongoing
+            const roundResults = battleRound(chosenCat, currentOpponent);
+            if (roundResults.continueBattle) {
+                res.render('battle-fight', {opponent: currentOpponent, cat: chosenCat});
+            }
+            // battle has ended, we have a winner
+            else {
+                battleEnd(req, res, roundResults.winner);
+            }
         }
     }
 });
@@ -304,7 +321,26 @@ async function battleEnd(req, res, winner) {
         // show lose screen
         res.render('battle-lose');
     }
+    inBattle = false;
+    chosenCat = null;
 }
+
+// player chooses whether to give up or try again with the current opponent
+app.post('/battle/lose', (req, res) => {
+    if (req.body.postBattle === 'giveUp') {
+        const randomOpponent = getRandomOpponent();
+        req.user.currentOpponent = randomOpponent;
+        currentOpponent = randomOpponent;
+        req.user.save((err) => {
+            if (err) {
+                res.render('gacha-roll', {errorMsg: "Error saving user's current opponent"});
+            }
+            res.redirect('/battle'); // on success, go back to battle page
+        });
+    } else {
+        res.redirect('/battle');
+    }
+});
 
 // gacha page, where players can roll on the gacha
 app.get('/gacha', (req, res) => {
@@ -317,32 +353,37 @@ app.get('/gacha', (req, res) => {
 });
 
 // gacha roll page, where players can see what cat they rolled
-app.get('/gacha/roll', (req, res) => { // TODO also shoudln't be gettable
-    // player doesn't have enough coins left
-    if (req.user.coins < 10) {
-        res.render('gacha', {errorMsg: "You don't have enough coins to roll. Battle to earn more coins!", coins: req.user.coins});
+app.get('/gacha/roll', (req, res) => {
+    // redirect to homepage if not logged in
+    if (!req.user) {
+        res.redirect('/');
     } else {
-        req.user.coins -= 10; // costs 10 coins to roll
-        rolledCat = getGachaRoll(); // calculate the cat the player rolled
-        Cat.findOne({player: req.user._id, fighterProfile: rolledCat}, (err, doc) => { // check if the player already has this cat
-            let haveCat = false;
-            if (err) {
-                res.render('gacha', {errorMsg: 'Error checking if you already have this cat'});
-            }
-            if (doc) {
-                haveCat = true;
-                req.user.coins += 5; // if player already has this cat, convert it to 5 coins and 2 fish instead
-                req.user.fish += 2;
-            }
-            req.user.save((err) => {
+        // player doesn't have enough coins left
+        if (req.user.coins < 10) {
+            res.render('gacha', {errorMsg: "You don't have enough coins to roll. Battle to earn more coins!", coins: req.user.coins});
+        } else {
+            req.user.coins -= 10; // costs 10 coins to roll
+            rolledCat = getGachaRoll(); // calculate the cat the player rolled
+            Cat.findOne({player: req.user._id, fighterProfile: rolledCat}, (err, doc) => { // check if the player already has this cat
+                let haveCat = false;
                 if (err) {
-                    res.render('gacha', {errorMsg: 'Error saving your coin and fish count'});
+                    res.render('gacha', {errorMsg: 'Error checking if you already have this cat'});
                 }
-                else {
-                    res.render('gacha-roll', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+                if (doc) {
+                    haveCat = true;
+                    req.user.coins += 5; // if player already has this cat, convert it to 5 coins and 2 fish instead
+                    req.user.fish += 2;
                 }
+                req.user.save((err) => {
+                    if (err) {
+                        res.render('gacha', {errorMsg: 'Error saving your coin and fish count'});
+                    }
+                    else {
+                        res.render('gacha-roll', {coins: req.user.coins, rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+                    }
+                });
             });
-        });
+        }
     }
 });
 
@@ -388,6 +429,6 @@ app.post('/gacha/roll', (req, res) => {
             }
         });
     }
-}); 
+});
 
 app.listen(process.env.PORT || 3000);
