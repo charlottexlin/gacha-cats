@@ -33,6 +33,7 @@ app.set("view engine", "hbs");
 
 // body parsing middleware
 app.use(express.urlencoded({extended: false}));
+app.use(express.json());
 
 // static file serving middleware
 app.use(express.static(path.join(__dirname, 'public')));
@@ -162,7 +163,7 @@ app.get('/collection', (req, res) => {
         // get the documents for each of this player's cats
         Cat.find({'_id': {$in: req.user.cats}}, (err, docs) => {
             if (err) {
-                res.render('collection', {errorMsg: 'Error displaying cats'});
+                // TODO
             } else {
                 // show collection page that lists all the player's cats
                 if (docs.length === 0) {
@@ -175,13 +176,42 @@ app.get('/collection', (req, res) => {
     }
 });
 
+// TODO the callbacks are getting weird. I might change everything to promises/async and await...
+
+// user clicked on a button to feed fish to one of the cats on the collection page
+app.post('/collection', async (req, res) => {
+    // find the requested cat in the database
+    const cat = await Cat.findOne({name: req.body.catName});
+    console.log("CATNAME", req.body.catName); // TODO
+    // user doesn't have enough fish
+    if (req.user.fish <= 0) {
+        res.json({errorMsg: "You don't have enough fish. Win battles to get more fish!"});
+    }
+    // cat is already at full HP and can't be healed
+    else if (cat.currentHP === cat.fighterProfile.maxHP) {
+        res.json({errorMsg: cat.name + " is already at full HP!"});
+    }
+    // all good
+    else {
+        cat.currentHP += 5;
+        req.user.fish--;
+        await cat.save();
+        try {
+            await req.user.save();
+            res.json({status: 'success', currentHP: cat.currentHP});
+        } catch (err) {
+            res.json({status: 'error'});
+        }
+    }
+});
+
 // battle start page, where players can set up a battle
 app.get('/battle', (req, res) => {
     // redirect to homepage if not logged in
     if (!req.user) {
         res.redirect('/');
     } else {
-        // create opponent TODO I want it to make a new opponent every time?
+        // create opponent TODO I want it to make a new opponent every time? (I think this is fixed)
         currentOpponent = createOpponent(req.user.currentOpponent);
 
         // get the documents for each of this player's cats
@@ -299,6 +329,9 @@ async function battleEnd(req, res, winner) {
                 fish = 50;
                 break;
         }
+        // give player rewards
+        req.user.coins += coins;
+        req.user.fish += fish;
         // update player's win streak
         req.user.winStreak++;
         // update player's battle counter, and possibly level

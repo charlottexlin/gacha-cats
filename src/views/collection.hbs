@@ -1,20 +1,23 @@
-<br>
-{{#if errorMsg}}
-<div class="error">
-    {{ errorMsg }}
-</div>
-{{/if}}
-{{#if noCats}}
-<h2>You don't have any cats in your collection yet. Roll on the gacha to get new cats!</h2>
-{{/if}}
-{{#each cats as |cat|}}
-    <div>
-        <img src={{cat.fighterProfile.image}} width="100" height="115">
-        <h3>{{cat.name}}</h3>
-        <div>{{cat.fighterProfile.rarity}}</div>
-        <div>Power level: {{cat.fighterProfile.powerLevel}}</div>
-        <div>Current HP: {{cat.currentHP}}</div>
-        <div>Battles won: {{cat.battlesWon}}</div>
-        <hr>
+<div class="container-fluid text-center">
+    <div class="alert alert-danger d-none"></div>
+    {{#if noCats}}
+    <p class="h3">You don't have any cats in your collection yet. Roll on the gacha to get new cats!</p>
+    {{/if}}
+    <div class="container-sm text-start">
+        {{#each cats as |cat|}}
+            <div class="card d-inline-block px-3 mx-3 my-3" style="width: 18rem;">
+                <div class="card-body text-center">
+                    <p class="card-title" id="catName">{{cat.name}}</p>
+                    <img src={{cat.fighterProfile.image}} width="200" height="230">
+                    <p class="card-subtitle">{{cat.fighterProfile.rarity}}</p>
+                    <p class="card-text">Power level {{cat.fighterProfile.powerLevel}}</p>
+                    <p class="card-text" id="hp">❤️ {{cat.currentHP}}</p>
+                    <p class="card-text">Battles won: {{cat.battlesWon}}</p>
+                    <button type="button" class="btn btn-secondary">Give fish 🐟</button>
+                </div>
+            </div>
+        {{/each}}
     </div>
-{{/each}}
+</div>
+fish: {{user.fish}}
+<script src="/javascripts/collection.js"></script>
