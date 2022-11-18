@@ -13,11 +13,13 @@
                     <p class="card-text">Power level {{cat.fighterProfile.powerLevel}}</p>
                     <p class="card-text" id="hp">❤️ {{cat.currentHP}}</p>
                     <p class="card-text">Battles won: {{cat.battlesWon}}</p>
-                    <button type="button" class="btn btn-secondary">Give fish 🐟</button>
+                    <button type="button" class="btn btn-secondary">Feed fish 🐟</button>
                 </div>
             </div>
         {{/each}}
     </div>
+    <div id="fishCount">
+        🐟 {{user.fish}}
+    </div>
 </div>
-fish: {{user.fish}}
 <script src="/javascripts/collection.js"></script>

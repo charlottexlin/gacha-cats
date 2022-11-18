@@ -13,25 +13,25 @@ function main() {
 async function onClick(event) {
     // get the name of the cat whose card was clicked
     const catName = event.target.parentElement.querySelector('#catName').textContent;
-    console.log(catName);
     // send a POST request to the server with the cat name
-    console.log("stringified", JSON.stringify({catName})); // TODO
     const res = await fetch('/collection', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({catName}) // TODO not being sent properly??
+        body: JSON.stringify({catName})
     });
     // parse the response
-    const updatedCatData = await res.json();
-    if (updatedCatData.errorMsg) { // the player is not allowed to feed this cat fish - show the alert banner
+    const updatedData = await res.json();
+    if (updatedData.errorMsg) { // the player is not allowed to feed this cat fish - show the alert banner
         const errorMsg = document.querySelector('.alert');
         errorMsg.classList.remove('d-none');
-        errorMsg.textContent = updatedCatData.errorMsg;
-    } else { // otherwise update cat's HP text
-        const hpText = event.target.parentElement.querySelector('#hp');
-        hpText.textContent = '❤️ ' + updatedCatData.currentHP;
+        errorMsg.textContent = updatedData.errorMsg;
+    } else { // otherwise update cat's HP text and user's fish text
+        const hp = event.target.parentElement.querySelector('#hp');
+        hp.textContent = '❤️ ' + updatedData.currentHP;
+        const fishCount = event.target.parentElement.querySelector('#fishCount');
+        fishCount.textContent = '🐟 ' + updatedData.fish;
     }
 }
 

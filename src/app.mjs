@@ -182,10 +182,9 @@ app.get('/collection', (req, res) => {
 app.post('/collection', async (req, res) => {
     // find the requested cat in the database
     const cat = await Cat.findOne({name: req.body.catName});
-    console.log("CATNAME", req.body.catName); // TODO
     // user doesn't have enough fish
     if (req.user.fish <= 0) {
-        res.json({errorMsg: "You don't have enough fish. Win battles to get more fish!"});
+        res.json({status: 'success', errorMsg: "You don't have enough fish. Win battles to get more fish!"});
     }
     // cat is already at full HP and can't be healed
     else if (cat.currentHP === cat.fighterProfile.maxHP) {
@@ -193,12 +192,16 @@ app.post('/collection', async (req, res) => {
     }
     // all good
     else {
-        cat.currentHP += 5;
+        if (cat.currentHP + 5 > cat.fighterProfile.maxHP) { // don't allow cat's HP to go over the max
+            cat.currentHP = cat.fighterProfile.maxHP;
+        } else {
+            cat.currentHP += 5;
+        }
         req.user.fish--;
         await cat.save();
         try {
             await req.user.save();
-            res.json({status: 'success', currentHP: cat.currentHP});
+            res.json({status: 'success', currentHP: cat.currentHP, fish: req.user.fish});
         } catch (err) {
             res.json({status: 'error'});
         }
@@ -446,13 +449,13 @@ app.post('/gacha/roll', (req, res) => {
         res.render('gacha-roll', {errorMsg: "Cat name can not include characters ~'`!@#$%^&*()+={}[]|\\/:;\"<>?,", coins: req.user.coins, rolledCat: rolledCat, haveCat: false});
     } else {
         // ensure cat's name is not a duplicate name
-        Cat.findOne({name: catName}, (err, doc) => {
+        Cat.findOne({name: catName, player: req.user._id}, (err, doc) => {
             if (err) {
                 res.render('gacha-roll', {errorMsg: "Error checking cat's name"});
             } else {
                 // already have a cat by this name
                 if (doc) {
-                    res.render('gacha-roll', {errorMsg: 'You already have a cat by that name'});
+                    res.render('gacha-roll', {errorMsg: 'You already have a cat by that name'}); // TODO render the rest of the page too please
                 } else { // all good
                     // create the new cat for this player to have
                     const newCat = new Cat({
