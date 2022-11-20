@@ -10,7 +10,7 @@ const PlayerSchema = new mongoose.Schema({
     playerLevel: {type: Number, min: 1, required: true}, // (total # of battles won) / 10
     battleCounter: {type: Number, min: 0, max: 10, required: true}, // number of battles this player has won since they last leveled up, used for setting player level
     cats: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Cat' }], // array of references to Cats documents; represents the Cats a player has
-    currentOpponent: {type: Object, required: true} // a reference to a FighterProfile object that represents the current opponent this player is facing
+    currentOpponent: {type: Object, required: true} // a FighterProfile object that represents the current opponent this player is facing
 });
 
 // authentication for player login
@@ -20,9 +20,9 @@ PlayerSchema.plugin(passportLocalMongoose);
 const CatSchema = new mongoose.Schema({
     player: {type: mongoose.Schema.Types.ObjectId, ref: 'Player'}, // a reference to the Player to which this Cat belongs
     name: {type: String, required: true}, // name that the player chose for this cat
-    fighterProfile: {type: Object, required: true}, // a reference to a FighterProfile object, which holds the immutable properties of this cat
+    fighterProfile: {type: Object, required: true}, // a FighterProfile object, which holds the immutable properties of this cat
     currentHP: {type: Number, required: true}, // increases if a fish is used on this Cat, decreases in battle
-    battlesWon: {type: Number, min: 0, required: true} // how many battles this Cat has won
+    battlesWon: {type: Number, min: 0, required: true} // how many battles this Cat has won in total
 });
 
 // Register models

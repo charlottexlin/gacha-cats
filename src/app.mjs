@@ -425,11 +425,11 @@ app.post('/gacha/roll', async(req, res) => {
                 battlesWon: 0
             });
             // save the cat into the database
+            // REFERENCE: https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose
             await newCat.save();
             req.user.cats.push(newCat._id);
             await req.user.save();
             res.redirect('/gacha'); // go back to gacha page
-            // TODO possibly add try-catch blocks to catch errors?
         }
     }
 });
