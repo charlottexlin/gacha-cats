@@ -5,11 +5,13 @@ import session from 'express-session';
 import memoryStore from 'memorystore';
 import passport from 'passport';
 import mongoose from 'mongoose';
+import validator from 'validator';
 import './db.mjs';
 import './auth.mjs';
-import {getGachaRoll} from './gacha.mjs';
-import {getOpponent, getRandomOpponent} from './opponentProfiles.mjs';
-import {battleRound, createOpponent} from './battle.mjs';
+import { passwordStrength, specialChars } from './auth.mjs';
+import { getGachaRoll } from './gacha.mjs';
+import { getOpponent, getRandomOpponent } from './opponentProfiles.mjs';
+import { battleRound, createOpponent } from './battle.mjs';
 
 // ---------- APP SET UP AND MIDDLEWARE REGISTRATION ----------
 // set up express app
@@ -22,7 +24,6 @@ const Player = mongoose.model('Player');
 const Cat = mongoose.model('Cat');
 
 // globals
-const specialChars = "~'`!@#$%^&*()+={}[]|\\/:;\"<>?,";
 let rolledCat = null;
 let chosenCat = null;
 let currentOpponent = null;
@@ -82,20 +83,19 @@ app.get('/register', (req, res) => {
 // REFERENCE: Professor Versoza's slides on Passport.js [https://cs.nyu.edu/courses/fall22/CSCI-UA.0467-001/_site/slides/16/auth.html#/]
 // REFERENCE: Passport.js documentation [https://www.passportjs.org/docs/]
 app.post('/register', (req, res, next) => {
+    // user input validation using Validator library
     // ensure that username is between 5 - 20 characters and contains no special characters, and that password is 8 or more characters
     const username = req.body.username.trim();
-    if (username.length < 5) {
-        res.render('login', {errorMsg: 'Username must be at least 5 characters long.', pageName:'Register', action: 'register'});
-    } else if (username.length > 20) {
-        res.render('login', {errorMsg: 'Username can not be longer than 20 characters.', pageName:'Register', action: 'register'});
+    if (!validator.isByteLength(username, {min: 5, max: 20})) {
+        res.render('login', {errorMsg: 'Username must be between 5 to 20 characters long.', pageName:'Register', action: 'register'});
     } else if (username.includes(' ') || [...specialChars].some(char => username.includes(char))) { // use of HOF some
-        res.render('login', {errorMsg: "Username can not include spaces or characters ~'`!@#$%^&*()+={}[]|\\/:;\"<>?,", pageName: 'Register', action: 'register'});
-    } else if (req.body.password.length < 8) {
-        res.render('login', {errorMsg: 'Password must be at least 8 characters long.', pageName: 'Register', action: 'register'});
+        res.render('login', {errorMsg: "Username can not include spaces or special characters, except _ - and .", pageName: 'Register', action: 'register'});
+    } else if (!validator.isStrongPassword(req.body.password, passwordStrength)) {
+        res.render('login', {errorMsg: 'Password must be at least 8 characters long and have at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 symbol', pageName: 'Register', action: 'register'});
     } else {
         // if everything's good, create a new player with blank stats in the database
         Player.register(new Player({
-            username: username,
+            username: validator.escape(username), // sanitize username just in case
             winStreak: 0,
             coins: 1000, // TODO temporary for testing
             fish: 100, // TODO
@@ -403,12 +403,12 @@ app.get('/gacha/roll', async(req, res) => {
 
 // post to gacha roll page, where players can name a new cat they just rolled
 app.post('/gacha/roll', async(req, res) => {
-    // ensure cat's name is not too long and doesn't have special characters
-    const catName = req.body.name.trim();
-    if (catName.length > 20) {
-        res.render('gacha-roll', {errorMsg: 'Cat name can not be longer than 20 characters', rolledCat: rolledCat, haveCat: false});
+    // validate and sanitize user input for cat's name using Validator library
+    let catName = req.body.name.trim();
+    if (!validator.isByteLength(catName, {min: 1, max: 20})) {
+        res.render('gacha-roll', {errorMsg: 'Cat name must be between 1 to 20 characters', rolledCat: rolledCat, haveCat: false});
     } else if ([...specialChars].some(char => catName.includes(char))) {
-        res.render('gacha-roll', {errorMsg: "Cat name can not include characters ~'`!@#$%^&*()+={}[]|\\/:;\"<>?,", rolledCat: rolledCat, haveCat: false});
+        res.render('gacha-roll', {errorMsg: "Cat name can not include special characters, except _ - and .", rolledCat: rolledCat, haveCat: false});
     } else {
         // ensure cat's name is not a duplicate name
         const cat = await Cat.findOne({name: catName, player: req.user._id});
@@ -419,7 +419,7 @@ app.post('/gacha/roll', async(req, res) => {
             // create the new cat for this player to have
             const newCat = new Cat({
                 player: req.user._id,
-                name: catName,
+                name: validator.escape(catName), // sanitize cat name, just in case
                 fighterProfile: rolledCat,
                 currentHP: rolledCat.maxHP,
                 battlesWon: 0
