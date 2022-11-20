@@ -1,10 +1,5 @@
 // profiles for cats
-import {FighterProfile} from './fighterProfile.mjs';
-
-const commonPercentage = 0.105;
-const uncommonPercentage = 0.043;
-const rarePercentage = 0.02;
-const legendaryPercentage = 0.005;
+import {FighterProfile, commonPercentage, uncommonPercentage, rarePercentage, legendaryPercentage} from './fighterProfile.mjs';
 
 export const cats = [
     // common cats

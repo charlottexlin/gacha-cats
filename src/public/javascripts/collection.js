@@ -30,7 +30,7 @@ async function onClick(event) {
     } else { // otherwise update cat's HP text and user's fish text
         const hp = event.target.parentElement.querySelector('#hp');
         hp.textContent = '❤️ ' + updatedData.currentHP;
-        const fishCount = event.target.parentElement.querySelector('#fishCount');
+        const fishCount = document.querySelector('#fishCount');
         fishCount.textContent = '🐟 ' + updatedData.fish;
     }
 }

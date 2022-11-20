@@ -9,14 +9,16 @@ export function createOpponent(opponentProfile) {
 }
 
 // Runs one round of a battle between the two given fighters (NOT profiles)
-export function battleRound(cat, opponent) { // TODO add front end stuff
+export function battleRound(cat, opponent) {
     let continueBattle = true;
     let winner = '';
 
     // Cat attacks opponent
-    opponent.currentHP -= calculateAttack(cat.fighterProfile.critRate, cat.fighterProfile.powerLevel); // TODO some display
+    const catAtk = calculateAttack(cat.fighterProfile.critRate, cat.fighterProfile.powerLevel);
+    opponent.currentHP -= catAtk.atk;
     // Opponent attacks cat
-    cat.currentHP -= calculateAttack(opponent.fighterProfile.critRate, opponent.fighterProfile.powerLevel);
+    const oppAtk = calculateAttack(opponent.fighterProfile.critRate, opponent.fighterProfile.powerLevel);
+    cat.currentHP -= oppAtk.atk;
 
     // Battle ends either one runs out of HP
     if (opponent.currentHP <= 0) {
@@ -30,17 +32,23 @@ export function battleRound(cat, opponent) { // TODO add front end stuff
         continueBattle = false;
     }
     
-    return {continueBattle: continueBattle, winner: winner}
+    return {
+        continueBattle: continueBattle,
+        winner: winner,
+        catAtk: catAtk.atk, 
+        oppAtk: oppAtk.atk,
+        catCrit: catAtk.crit,
+        oppCrit: oppAtk.crit
+    }
 }
 
 // Return the damage a fighter does, damage is random and scaled off the fighter's power level
 function calculateAttack(critRate, powerLevel) {
     const isCrit = chance.weighted([true, false], [critRate, 1-critRate]);
     // critical hit - attack is double the power level
-    if (isCrit === true) { // TODO maybe show some display
-        console.log('CRIT ATTACK'); // TODO
-        return Math.round(powerLevel * 2);
+    if (isCrit === true) {
+        return {atk: Math.round(powerLevel * 2), crit: true};
     } else {
-        return Math.round(powerLevel * chance.floating({ min: 0.8, max: 1.4}));
+        return {atk: Math.round(powerLevel * chance.floating({ min: 0.8, max: 1.4})), crit: false};
     }
 }

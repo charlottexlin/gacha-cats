@@ -26,7 +26,7 @@ const specialChars = "~'`!@#$%^&*()+={}[]|\\/:;\"<>?,";
 let rolledCat = null;
 let chosenCat = null;
 let currentOpponent = null;
-let inBattle = false;
+let battleRounds = 0;
 
 // use handlebars
 app.set("view engine", "hbs");
@@ -74,7 +74,7 @@ app.get('/', (req, res) => {
 // registration page, where new players can make an account
 app.get('/register', (req, res) => {
     chosenCat = null;
-    inBattle = false;
+    battleRounds = 0;
     res.render('login', {pageName: 'Register', action: 'register'});
 });
 
@@ -98,7 +98,7 @@ app.post('/register', (req, res, next) => {
             username: username,
             winStreak: 0,
             coins: 1000, // TODO temporary for testing
-            fish: 0,
+            fish: 100, // TODO
             playerLevel: 1,
             battleCounter: 0,
             cats: [],
@@ -119,7 +119,7 @@ app.post('/register', (req, res, next) => {
 // login page, where returning players can log into an existing account
 app.get('/login', (req, res) => {
     chosenCat = null;
-    inBattle = false;
+    battleRounds = 0;
     res.render('login', {pageName: 'Login', action: 'login'});
 });
 
@@ -170,8 +170,6 @@ app.get('/collection', async(req, res) => {
         }
     }
 });
-
-// TODO the callbacks are getting weird. I might change everything to promises/async and await...
 
 // user clicked on a button to feed fish to one of the cats on the collection page
 app.post('/collection', async(req, res) => {
@@ -245,16 +243,25 @@ app.get('/battle/fight', (req, res) => {
         res.redirect('/');
     } else {
         // first round of battle
-        if (!inBattle) {
-            res.render('battle-fight', {opponent: currentOpponent, cat: chosenCat});
-            inBattle = true;
+        if (battleRounds === 0) {
+            res.render('battle-fight', {opponent: currentOpponent, cat: chosenCat, battleRound: battleRounds});
+            battleRounds++;
         }
         // subsequent rounds
         else {
             // battle is ongoing
+            battleRounds++;
             const roundResults = battleRound(chosenCat, currentOpponent);
             if (roundResults.continueBattle) {
-                res.render('battle-fight', {opponent: currentOpponent, cat: chosenCat});
+                res.render('battle-fight', {
+                    opponent: currentOpponent,
+                    cat: chosenCat,
+                    battleRound: battleRounds,
+                    catAtk: roundResults.catAtk,
+                    oppAtk: roundResults.oppAtk,
+                    catCrit: roundResults.catCrit,
+                    oppCrit: roundResults.oppCrit
+                });
             }
             // battle has ended, we have a winner
             else {
@@ -266,6 +273,7 @@ app.get('/battle/fight', (req, res) => {
 
 // helper function that does all necessary updates after a battle ends
 async function battleEnd(req, res, winner) {
+    let levelUp = false;
     // update cat's current HP and battles won
     const cat = await Cat.findOne({name: chosenCat.name});
     cat.currentHP = chosenCat.currentHP;
@@ -316,7 +324,8 @@ async function battleEnd(req, res, winner) {
         req.user.winStreak++;
         // update player's battle counter, and possibly level
         if (req.user.battleCounter + 1 === 10) { // reached the next level
-            req.user.playerLevel++; // TODO possibly show a message on level up??
+            req.user.playerLevel++;
+            levelUp = true;
             req.user.battleCounter = 0; // reset battle counter
         } else {
             req.user.battleCounter++;
@@ -328,18 +337,19 @@ async function battleEnd(req, res, winner) {
         // Set global
         currentOpponent = randomOpponent;
         // show win screen
-        res.render('battle-win', {fish: fish, coins: coins});
+        res.render('battle-win', {fish: fish, coins: coins, levelUp: levelUp});
     }
     // opponent won
     else if (winner === 'opponent') {
         // update player's win streak
         if (req.user.winStreak > 0) {
             req.user.winStreak = 0;
+            await req.user.save();
         }
         // show lose screen
         res.render('battle-lose');
     }
-    inBattle = false;
+    battleRounds = 0;
     chosenCat = null;
 }
 
@@ -354,11 +364,6 @@ app.post('/battle/lose', async(req, res) => {
     } else { // player wants to try again with this opponent, leave as is
         res.redirect('/battle');
     }
-});
-
-// player clicks button to return to battle set up page after winning
-app.post('/battle/win', (req, res) => {
-    res.redirect('/battle');
 });
 
 // gacha page, where players can roll on the gacha

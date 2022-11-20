@@ -1,7 +1,9 @@
-<div class="container-fluid text-center">
+<div class="container-sm text-center">
     <p class="h1">You won!<p>
     <p class="h2">You got: {{fish}} fish and {{coins}} coins</p>
-    <form method="POST" action="win">
-        <input type="submit" value="Back to battle setup" class="btn btn-secondary">
-    </form>
+    {{#if levelUp}}
+        <p class="h1 text-primary">Level up!</p>
+        <p class="h3">Your level is now {{user.playerLevel}}.</p>
+    {{/if}}
+    <a href="/battle" class="btn btn-secondary">Back to battle setup</a>
 </div>

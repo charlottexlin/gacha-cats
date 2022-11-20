@@ -1,14 +1,9 @@
 // profiles for opponents
 import Chance from 'chance';
-import {FighterProfile} from './fighterProfile.mjs';
+import {FighterProfile, commonPercentage, uncommonPercentage, rarePercentage, legendaryPercentage} from './fighterProfile.mjs';
 
 // Instantiate chance
 const chance = new Chance();
-
-const commonPercentage = 0.105;
-const uncommonPercentage = 0.043;
-const rarePercentage = 0.02;
-const legendaryPercentage = 0.005;
 
 const opponents = [
     // common opponents

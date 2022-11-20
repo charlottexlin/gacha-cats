@@ -1,15 +1,34 @@
+<div class="container-sm text-center">
+    <p class="h1">Battle round {{battleRound}}</p>
+</div>
 <div class="row justify-content-md-center">
     <div class="col col-lg-3">
+        {{#if catAtk}}
+            <p class="h4 text-primary">{{cat.name}} does {{catAtk}} damage!</p>
+        {{/if}}
         <img src="{{cat.fighterProfile.image}}" alt="Your cat" class="img-fluid">
         <p class="h2">{{cat.name}}</p>
         <p class="h3">{{cat.fighterProfile.subtitle}}</p>
         <p class="h3">❤️ {{cat.currentHP}}</p>
     </div>
     <div class="col col-lg-3">
+        {{#if oppAtk}}
+            <p class="h4 text-primary">{{opponent.fighterProfile.defaultName}} does {{oppAtk}} damage!</p>
+        {{/if}}
         <img src="{{opponent.fighterProfile.image}}" alt="Opponent" class="img-fluid">
         <p class="h2">{{opponent.fighterProfile.defaultName}}</p>
         <p class="h3">{{opponent.fighterProfile.subtitle}}</p>
         <p class="h3">❤️ {{opponent.currentHP}}</p>
     </div>
 </div>
+{{#if catCrit}}
+    <div class="alert alert-primary">
+        {{cat.name}} deals a critical attack!
+    </div>
+{{/if}}
+{{#if oppCrit}}
+    <div class="alert alert-primary">
+        {{opponent.fighterProfile.defaultName}} deals a critical attack!
+    </div>
+{{/if}}
 <a href="/battle/fight" class="btn btn-primary">ATTACK!</href>

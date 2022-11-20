@@ -1,3 +1,9 @@
+// Roll percentages
+const commonPercentage = 0.105;
+const uncommonPercentage = 0.043;
+const rarePercentage = 0.02;
+const legendaryPercentage = 0.005;
+
 export class FighterProfile {
     constructor(defaultName, subtitle, fighterType, image, maxHP, powerLevel, critRate, rarity, rollProbability) {
         // set the default name of this fighter
@@ -51,4 +57,8 @@ export class FighterProfile {
             this.rollProbability = 0;
         }
     }
+}
+
+export {
+    commonPercentage, uncommonPercentage, rarePercentage, legendaryPercentage
 }
