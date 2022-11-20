@@ -58,6 +58,9 @@ An example Cat:
 
 ## Wireframes
 
+/ - homepage where players who are not logged in can choose to either register a new account or log into an existing account
+![index](documentation/index.jpg)
+
 /login - page for either registering a new player, or logging into your existing account
 
 ![login](documentation/login.jpg)
