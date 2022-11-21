@@ -1,4 +1,4 @@
-// main function to add event listeners to all the cat cards' buttons on the collection pgae
+// main function to add event listeners to all the cat cards' buttons on the collection page
 function main() {
     // select all the text content of all the cat cards on this page
     const catCards = document.querySelectorAll('.card-body');
@@ -23,11 +23,12 @@ async function onClick(event) {
     });
     // parse the response
     const updatedData = await res.json();
+    const alert = document.querySelector('.alert');
     if (updatedData.errorMsg) { // the player is not allowed to feed this cat fish - show the alert banner
-        const errorMsg = document.querySelector('.alert');
-        errorMsg.classList.remove('d-none');
-        errorMsg.textContent = updatedData.errorMsg;
+        alert.classList.remove('d-none');
+        alert.textContent = updatedData.errorMsg;
     } else { // otherwise update cat's HP text and user's fish text
+        alert.classList.add('d-none');
         const hp = event.target.parentElement.querySelector('#hp');
         hp.textContent = '❤️ ' + updatedData.currentHP;
         const fishCount = document.querySelector('#fishCount');
