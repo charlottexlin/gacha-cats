@@ -165,3 +165,4 @@ Clicking on a cat card's "feed" button reduces player's fish count and increases
 21. [changing size of bootstrap alert stack overflow](https://stackoverflow.com/questions/38379166/set-size-and-center-alert-box-in-twitter-bootstrap) - (src/public/scss/custom.scss)
 22. [bootstrap width classes stack overflow](https://stackoverflow.com/questions/39033326/width-of-inputs-in-inline-form-bootstrap-4) - (src/views/battle.hbs)
 23. [google fonts api documentation](https://developers.google.com/fonts/docs/getting_started) - (src/views/layout.hbs)
+24. [resolve google fonts api issue stack overflow](https://stackoverflow.com/questions/46268657/google-webfont-only-works-locally) - (src/views/layout.hbs)
