@@ -115,11 +115,12 @@ In the header of the web app, it shows the title of the game, navigation buttons
 * (5 points) User authentication using PassportJS
 * (1 point) Implemented gacha functionality using ChanceJS library
 * (1 point) Session store w/o memory leaks using MemoryStore library
-* (2 points) UI using Bootstrap, with a customized theme done in Sass (CUSTOM THEME IS WIP!!!)
+* (2 points) UI using Bootstrap, with a customized theme done in Sass
 * (1 point) User text input validation + sanitization using Validator library
 * (1 point) Custom font using Google Fonts API
+* (1 point) Optimized bootstrap CSS file using purgecss library, in development
 
-Total: 11 points
+Total: 12 points
 
 ## [Link to Main Project File](src/app.mjs) 
 
@@ -166,3 +167,6 @@ Clicking on a cat card's "feed" button reduces player's fish count and increases
 22. [bootstrap width classes stack overflow](https://stackoverflow.com/questions/39033326/width-of-inputs-in-inline-form-bootstrap-4) - (src/views/battle.hbs)
 23. [google fonts api documentation](https://developers.google.com/fonts/docs/getting_started) - (src/views/layout.hbs)
 24. [resolve google fonts api issue stack overflow](https://stackoverflow.com/questions/46268657/google-webfont-only-works-locally) - (src/views/layout.hbs)
+25. [bootstrap optimization](https://getbootstrap.com/docs/5.0/customize/optimize/)
+26. [purgecss tutorial](https://medium.com/dwarves-foundation/remove-unused-css-styles-from-bootstrap-using-purgecss-88395a2c5772)
+27. [purgecss documentation](https://purgecss.com/CLI.html)
