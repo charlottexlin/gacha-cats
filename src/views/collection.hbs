@@ -1,23 +1,27 @@
-<div class="container-fluid text-center">
+<div class="container-fluid text-center justify-content-sm-center">
     <div class="alert alert-danger d-none"></div>
     {{#if noCats}}
     <p class="h3">You don't have any cats in your collection yet. Roll on the gacha to get new cats!</p>
     {{/if}}
     <div class="container-sm text-start">
         {{#each cats as |cat|}}
-            <div class="card d-inline-block px-3 mx-3 my-3" style="width: 18rem;">
+            <div class="card d-inline-block px-3 mx-3 my-3" style="width: 24rem;">
                 <div class="card-body text-center">
-                    <p class="card-title" id="catName">{{cat.name}}</p>
+                    <p class="card-title fw-bold" id="catName">{{cat.name}}</p>
                     <img src={{cat.fighterProfile.image}} width="200" height="230">
-                    <p class="card-subtitle">{{cat.fighterProfile.rarity}}</p>
-                    <p class="card-text">Power level {{cat.fighterProfile.powerLevel}}</p>
-                    <p class="card-text" id="hp">❤️ {{cat.currentHP}}</p>
-                    <p class="card-text">Battles won: {{cat.battlesWon}}</p>
+                    <p class="card-subtitle fw-bold mb-0">{{cat.fighterProfile.rarity}}</p>
+                    <p class="card-text mb-0">Power level {{cat.fighterProfile.powerLevel}}</p>
+                    <p class="card-text mb-0" id="hp">❤️ {{cat.currentHP}}</p>
+                    <p class="card-text mb-0">Battles won: {{cat.battlesWon}}</p>
                     <button type="button" class="btn btn-secondary">Feed fish 🐟</button>
                 </div>
             </div>
         {{/each}}
     </div>
-    <p class="h1 fixed-bottom text-white bg-dark" id="fishCount"> 🐟 {{user.fish}} </p>
+    <div class="card fixed-bottom bg-dark bg-opacity-75 border-0 mx-auto" style="width: 10rem; height: 4rem;">
+        <div class="card-body text-center">
+            <p class="h2 card-title text-white" id="fishCount">🐟{{user.fish}}</p>
+        </div>
+    </div>
 </div>
 <script src="/javascripts/collection.js"></script>

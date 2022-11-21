@@ -1,5 +1,5 @@
 <div class="container-sm text-center">
-		<h1>{{pageName}}</h1>
+	<p class="h1">{{pageName}}</p>
 	{{#if errorMsg}}
         <div class="alert alert-danger">
             {{ errorMsg }}
@@ -8,11 +8,11 @@
 	<form method="POST" action="{{action}}">
 		<div>
 			<label for="username" class="form-label">Username</label>
-			<input type="text" name="username" value="" placeholder="Username" class="form-control">
+			<input type="text" name="username" value="" placeholder="Username" class="form-control w-50">
 		</div>
 		<div>
 			<label for="password" class="form-label">Password</label> 
-			<input type="password" name="password" value="" placeholder="Password" class="form-control">
+			<input type="password" name="password" value="" placeholder="Password" class="form-control w-50 mb-3">
 		</div>
 		<div>
 			<input type="submit" value="{{pageName}}" class="btn btn-secondary">

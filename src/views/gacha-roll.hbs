@@ -6,11 +6,11 @@
     {{/if}}
     <img src={{rolledCat.image}} alt="You rolled {{rolledCat.defaultName}}!" class="img-fluid">
     <div>
-        <p class="h2 text-primary">{{rolledCat.defaultName}}</p>
-        <p class="h3 text-secondary">{{rolledCat.subtitle}}</p>
-        <p class="h4"><strong>{{rolledCat.rarity}}</strong></p>
-        <p class="h4">Max HP: {{rolledCat.maxHP}}</p>
-        <p class="h4">Power level: {{rolledCat.powerLevel}}</p>
+        <p class="h1 text-primary fw-bold">{{rolledCat.defaultName}}</p>
+        <p class="h3 text-dark">{{rolledCat.subtitle}}</p>
+        <p class="h4 fw-bold">{{rolledCat.rarity}}</p>
+        <p class="h5">Max HP: {{rolledCat.maxHP}}</p>
+        <p class="h5">Power level: {{rolledCat.powerLevel}}</p>
     </div>
     {{#if haveCat}}
         <p class="h4">You already have this cat - converted to 5 coins instead</p>
@@ -18,7 +18,7 @@
     {{else}}
         <form method="POST" action="/gacha/roll" id="renameCatForm">
             <label for="name" class="form-label">Rename your cat!</label>
-            <input type="text" name="name" value="{{rolledCat.defaultName}}" class="form-control">
+            <input type="text" name="name" value="{{rolledCat.defaultName}}" class="form-control w-50 mb-3">
             <input type="submit" value="Submit" class="btn btn-secondary">
         </form>
     {{/if}}

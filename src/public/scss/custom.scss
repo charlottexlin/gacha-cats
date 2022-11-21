@@ -1,1 +1,80 @@
-@import "node_modules/bootstrap/scss/bootstrap";
+// Theme colors
+$primary: #f1994a;
+$secondary: #ffe669;
+$danger: #ff5792;
+$dark: #c1742f;
+
+// Background
+$body-bg: #fffae0;
+
+// Border radius (for buttons, form input)
+$border-radius: 1rem;
+
+// Text
+$font-size-base: 18;
+$font-family-base: 'Short Stack', sans-serif;
+
+// Headers
+.h1 {
+    color: $dark;
+}
+
+// Button
+$btn-padding-x: 1rem;
+$btn-padding-y: 1rem;
+$btn-font-size: 1.5rem;
+
+// Text/select form input and labels
+$form-label-font-size: 1.5rem;
+$input-padding-x: 1rem;
+$input-padding-y: 1rem;
+.form-control {
+    margin: auto;
+}
+
+// Radio button form input and labels
+.form-check {
+    font-size: 2rem;
+}
+
+// Alerts
+.alert {
+    width: 50%;
+    margin: auto;
+}
+
+// Card text
+.card-title {
+    font-size: 2rem;
+}
+.card-subtitle {
+    font-size: 1.5rem;
+}
+
+@import "../../../node_modules/bootstrap/scss/bootstrap";
+
+
+
+
+//$theme-colors: map-remove($theme-colors, "success", "danger", "warning", "info", "light", "dark");
+
+/*
+@import "../../../node_modules/bootstrap/scss/functions";
+@import "../../../node_modules/bootstrap/scss/variables";
+@import "../../../node_modules/bootstrap/scss/maps";
+@import "../../../node_modules/bootstrap/scss/mixins";
+@import "../../../node_modules/bootstrap/scss/root";
+@import "../../../node_modules/bootstrap/scss/reboot";
+@import "../../../node_modules/bootstrap/scss/utilities";
+@import "../../../node_modules/bootstrap/scss/helpers";
+@import "../../../node_modules/bootstrap/scss/grid";
+@import "../../../node_modules/bootstrap/scss/containers";
+@import "../../../node_modules/bootstrap/scss/images";
+@import "../../../node_modules/bootstrap/scss/buttons";
+@import "../../../node_modules/bootstrap/scss/forms";
+@import "../../../node_modules/bootstrap/scss/navbar";
+@import "../../../node_modules/bootstrap/scss/nav";
+@import "../../../node_modules/bootstrap/scss/card";
+@import "../../../node_modules/bootstrap/scss/alert";
+@import "../../../node_modules/bootstrap/scss/type";
+*/
