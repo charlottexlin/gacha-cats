@@ -1,14 +1,20 @@
+<!-- Battle lose page -->
 <div class="container-fluid text-center">
+    <!-- Page header -->
     <p class="h1">You lost!<p>
     <div class="container-sm text-center">
         <div class="row justify-content-sm-center">
+            <!-- Columns to space out the page properly -->
             <div class="col col-sm-4"></div>
             <div class="col col-sm-3">
+                <!-- POST form with radio buttons to select try again or give up on opponent -->
                 <form method="POST" action="lose">
+                    <!-- Try again -->
                     <div class="form-check">
                         <input type="radio" name="postBattle" value="tryAgain" class="form-check-input" checked>
                         <label for="tryAgain" class="form-check-label">Try again</label><br>
                     </div>
+                    <!-- Give up -->
                     <div class="form-check">
                         <input type="radio" name="postBattle" value="giveUp" class="form-check-input">
                         <label for="giveUp" class="form-check-label mb-3">Give up</label>

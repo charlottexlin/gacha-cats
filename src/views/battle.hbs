@@ -1,27 +1,33 @@
+<!-- Battle set-up page -->
 <div class="container-sm text-center">
+	<!-- Information on current opponent -->
 	<p class="h2">The current opponent is...</p>
 	<img src={{opponent.fighterProfile.image}} alt="{{opponent.fighterProfile.defaultName}}" class="img-fluid">
 	<p class="h1">{{opponent.fighterProfile.defaultName}}</p>
+	<!-- Display message if player doesn't have any cats yet -->
 	{{#if noCats}}
 	<p class="h3">You don't have any cats to battle with yet. Roll on the gacha to get new cats!<p>
 	{{else}}
+		<!-- Display error message -->
 		{{#if errorMsg}}
 			<div class="alert alert-danger">
 				{{ errorMsg }}
 			</div>
 		{{/if}}
-	<form method="POST" action="battle">
-		<div>
-			<label for="chosenCat" class="form-label">Choose your fighter:</label>
-			<select name="chosenCat" class="form-select w-25 mx-auto mb-3">
-				{{#each cats as |cat|}}
-					<option value="{{cat.name}}">{{cat.name}}</option>
-				{{/each}}
-			</select>
-		</div>
-		<div>
-			<input type="submit" value="Begin battle" class="btn btn-secondary">
-		</div>
-	</form>
+		<!-- POST form to select a cat to enter battle -->
+		<form method="POST" action="battle">
+			<div>
+				<label for="chosenCat" class="form-label">Choose your fighter:</label>
+				<!-- List all of this player's cats as options -->
+				<select name="chosenCat" class="form-select w-25 mx-auto mb-3">
+					{{#each cats as |cat|}}
+						<option value="{{cat.name}}">{{cat.name}}</option>
+					{{/each}}
+				</select>
+			</div>
+			<div>
+				<input type="submit" value="Begin battle" class="btn btn-secondary">
+			</div>
+		</form>
 	{{/if}}
 </div>

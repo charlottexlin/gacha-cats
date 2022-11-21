@@ -1,15 +1,24 @@
 <head>
-    <!-- REFERENCE: https://www.w3schools.com/html/html_favicon.asp -->
+    <!-- Links for styles and fonts -->
     <link rel="stylesheet" href="/css/styles.css" media="screen">
+    <!-- REFERENCE: https://web.dev/font-best-practices/ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- REFERENCE: https://www.gyanblog.com/bootstrap/how-to-use-google-fonts-website-bootstrap/ -->
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Short+Stack">
-    <link rel="icon" type="image/x-icon" href="/img/favicon.ico">
+    <!-- Favicon -->
+    <!-- REFERENCE: https://www.w3schools.com/html/html_favicon.asp -->
+    <link rel="icon" type="image/x-icon" href="/img/new_favicon.ico">
+    <!-- Header for every page -->
     <div class="container-fluid text-center">
         <div class="row justify-content-lg-center">
+            <!-- Empty column for spacing -->
             <div class="col col-lg-4"></div>
+            <!-- Logo image -->
             <div class="col col-lg-4">
                 <img src="/img/logo.png" alt="Gacha Cats!">
             </div>
+            <!-- Log out button -->
             <div class="col col-lg-1 mt-5">
                 {{#if user}}
                     <form method="POST" action="logout">
@@ -17,19 +26,25 @@
                     </form>
                 {{/if}}
             </div>
+            <!-- Empty column for spacing -->
             <div class="col col-lg-3 my-auto"></div>
         </div>
+        <!-- Player information header -->
         {{#if user}}
             <div class="row justify-content-lg-center">
+                <!-- Username -->
                 <div class="col col-lg-2">
                     <p class="h3">{{user.username}}</p>
                 </div>
+                <!-- Player level -->
                 <div class="col col-lg-2">
                     <p class="h3">Level {{user.playerLevel}}</p>
                 </div>
+                <!-- Win streak -->
                 <div class="col col-lg-2">
                     <p class="h3">Win streak: {{user.winStreak}}</p>
                 </div>
+            <!-- Nav bar -->
             <nav class="nav justify-content-center my-3">
                 <a href="/collection" class="nav-item btn btn-primary text-white mx-3">Collection</a>
                 <a href="/battle" class="nav-item btn btn-primary text-white mx-3">Battle</a>
@@ -38,6 +53,7 @@
         {{/if}}
     </div>
 </head>
+<!-- Page body -->
 <body>
     {{{body}}}
 </body>

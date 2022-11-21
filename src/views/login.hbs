@@ -1,10 +1,14 @@
+<!-- Login/register page -->
 <div class="container-sm text-center">
+	<!-- Page header -->
 	<p class="h1">{{pageName}}</p>
+	<!-- Display error message -->
 	{{#if errorMsg}}
         <div class="alert alert-danger">
             {{ errorMsg }}
         </div>
     {{/if}}
+	<!-- POST form for login/register -->
 	<form method="POST" action="{{action}}">
 		<div>
 			<label for="username" class="form-label">Username</label>

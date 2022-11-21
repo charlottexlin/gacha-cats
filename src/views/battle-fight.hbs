@@ -1,26 +1,36 @@
+<!-- Battle turn page -->
 <div class="container-sm text-center">
+    <!-- Page header - display current round of battle -->
     <p class="h1">Battle round {{battleRound}}</p>
 </div>
+<!-- Row to contain both the cat and the opponent's information -->
 <div class="row justify-content-md-center">
+    <!-- Cat -->
     <div class="col col-lg-3">
+        <!-- Cat attack -->
         {{#if catAtk}}
             <p class="h4 text-primary">{{cat.name}} does {{catAtk}} damage!</p>
         {{/if}}
+        <!-- Cat image and info -->
         <img src="{{cat.fighterProfile.image}}" alt="Your cat" class="img-fluid">
         <p class="h2">{{cat.name}}</p>
         <p class="h4">{{cat.fighterProfile.subtitle}}</p>
         <p class="h3">❤️ {{cat.currentHP}}</p>
     </div>
+    <!-- Opponent -->
     <div class="col col-lg-3">
+        <!-- Opponent attack -->
         {{#if oppAtk}}
             <p class="h4 text-primary">{{opponent.fighterProfile.defaultName}} does {{oppAtk}} damage!</p>
         {{/if}}
+        <!-- Opponent image and info -->
         <img src="{{opponent.fighterProfile.image}}" alt="Opponent" class="img-fluid">
         <p class="h2">{{opponent.fighterProfile.defaultName}}</p>
         <p class="h4">{{opponent.fighterProfile.subtitle}}</p>
         <p class="h3">❤️ {{opponent.currentHP}}</p>
     </div>
 </div>
+<!-- Show display if either fighter has a critical attack -->
 {{#if catCrit}}
     <div class="alert alert-primary">
         {{cat.name}} deals a critical attack!
@@ -31,4 +41,5 @@
         {{opponent.fighterProfile.defaultName}} deals a critical attack!
     </div>
 {{/if}}
+<!-- Link to reload page, to move onto next turn of battle -->
 <a href="/battle/fight" class="btn btn-primary">ATTACK!</href>

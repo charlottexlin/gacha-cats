@@ -1,8 +1,12 @@
+<!-- Collection page -->
 <div class="container-fluid text-center justify-content-sm-center">
+    <!-- Error message - starts as display-none -->
     <div class="alert alert-danger d-none"></div>
+    <!-- Display message if player doesn't have any cats yet -->
     {{#if noCats}}
-    <p class="h3">You don't have any cats in your collection yet. Roll on the gacha to get new cats!</p>
+        <p class="h3">You don't have any cats in your collection yet. Roll on the gacha to get new cats!</p>
     {{/if}}
+    <!-- Cat cards -->
     <div class="container-sm text-start">
         {{#each cats as |cat|}}
             <div class="card d-inline-block px-3 mx-3 my-3" style="width: 24rem;">
@@ -18,10 +22,12 @@
             </div>
         {{/each}}
     </div>
+    <!-- Player fish count -->
     <div class="card fixed-bottom bg-dark bg-opacity-75 border-0 mx-auto" style="width: 10rem; height: 4rem;">
         <div class="card-body text-center">
             <p class="h2 card-title text-white" id="fishCount">🐟{{user.fish}}</p>
         </div>
     </div>
 </div>
+<!-- Script to add functionality to "Feed Fish" buttons -->
 <script src="/javascripts/collection.js"></script>

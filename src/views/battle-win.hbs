@@ -1,11 +1,16 @@
+<!-- Battle win page -->
 <div class="container-sm text-center">
+    <!-- Page header -->
     <p class="h1">You won!<p>
+    <!-- Rewards for winning battle -->
     <p class="h2">You got:
     <p class="h3">🐟 {{fish}}</p>
     <p class="h3">💰 {{coins}}</p>
+    <!-- Show message if player leveled up -->
     {{#if levelUp}}
         <p class="h1 text-primary">Level up!</p>
         <p class="h3">Your level is now {{user.playerLevel}}.</p>
     {{/if}}
+    <!-- Back link -->
     <a href="/battle" class="btn btn-secondary">Back to battle setup</a>
 </div>

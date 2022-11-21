@@ -117,12 +117,14 @@ In the header of the web app, it shows the title of the game, navigation buttons
 * (1 point) Session store w/o memory leaks using MemoryStore library
 * (2 points) UI using Bootstrap, with a customized theme done in Sass (CUSTOM THEME IS WIP!!!)
 * (1 point) User text input validation + sanitization using Validator library
+* (1 point) Custom font using Google Fonts API
 
-Total: 10 points
+Total: 11 points
 
 ## [Link to Main Project File](src/app.mjs) 
 
 ## Project Requirements
+
 ###### 3 forms or AJAX interactions:
 1. [Form to rename a newly-rolled cat](src/views/gacha-roll.hbs)
 2. [Form to select a cat to enter battle](src/views/battle.hbs)
@@ -137,7 +139,9 @@ Clicking on a cat card's "feed" button reduces player's fish count and increases
 3. Pages that require authentication will redirect to homepage if a player who is not logged in tries to access them through the URL bar
 4. Players can never view each other's data
 
+
 ## Annotations / References Used
+
 1. [passport.js authentication docs](http://passportjs.org/docs) - (src/app.mjs) and (src/auth.mjs)
 2. [Professor Versoza's slides on passport.js](https://cs.nyu.edu/courses/fall22/CSCI-UA.0467-001/_site/slides/16/auth.html#/) - (src/app.mjs) and (src/auth.mjs)
 3. [mongoose documentation](https://mongoosejs.com/docs)  - (src/db.mjs)
@@ -156,3 +160,8 @@ Clicking on a cat card's "feed" button reduces player's fish count and increases
 16. [official bootstrap tutorial on radio buttons](https://getbootstrap.com/docs/5.0/forms/checks-radios/) - (src/views/battle-lose.hbs)
 17. [w3schools bootstrap tutorial on radio buttons](https://www.w3schools.com/tags/att_input_type_radio.asp) - (src/views/battle-lose.hbs)
 18. [w3schools favicon tutorial](https://www.w3schools.com/html/html_favicon.asp) - (src/views/layout.hbs)
+19. [sass official guide](https://sass-lang.com/guide) - (src/public/scss/custom.scss)
+20. [bootstrap color customization video tutorial](https://www.youtube.com/watch?v=au5ccstcbnc&ab_channel=PixelRocket) - (src/public/scss/custom.scss)
+21. [changing size of bootstrap alert stack overflow](https://stackoverflow.com/questions/38379166/set-size-and-center-alert-box-in-twitter-bootstrap) - (src/public/scss/custom.scss)
+22. [bootstrap width classes stack overflow](https://stackoverflow.com/questions/39033326/width-of-inputs-in-inline-form-bootstrap-4) - (src/views/battle.hbs)
+23. [google fonts api documentation](https://developers.google.com/fonts/docs/getting_started) - (src/views/layout.hbs)
