@@ -113,12 +113,12 @@ In the header of the web app, it shows the title of the game, navigation buttons
 ## Research Topics
 
 * (5 points) User authentication using PassportJS
-* (1 point) Implemented gacha functionality using ChanceJS library
-* (1 point) Session store w/o memory leaks using MemoryStore library
-* (2 points) UI using Bootstrap, with a customized theme done in Sass
-* (1 point) User text input validation + sanitization using Validator library
-* (1 point) Custom font using Google Fonts API
-* (1 point) Optimized bootstrap CSS file using purgecss library, in development
+* (1 point) Implemented gacha and battle functionality using ChanceJS library: [gacha](src/gacha.mjs) and [battle](src/battle.mjs)
+* (1 point) Session store without memory leaks using MemoryStore library: [here](src/app.mjs)
+* (2 points) UI using Bootstrap, with a customized theme in Sass: [scss file here](src/public/scss/custom.scss)
+* (1 point) User text input validation + sanitization using Validator library: [here](src/app.mjs)
+* (1 point) Custom font using Google Fonts API: [here](src/views/layout.hbs)
+* (1 point) Optimized bootstrap CSS file using purgecss library (in development environment)
 
 Total: 12 points
 
@@ -129,8 +129,8 @@ Total: 12 points
 ###### 3 forms or AJAX interactions:
 1. [Form to rename a newly-rolled cat](src/views/gacha-roll.hbs)
 2. [Form to select a cat to enter battle](src/views/battle.hbs)
-3. [AJAX interaction - "feed" buttons](src/views/collection.hbs) and (src/public/javascripts/collection.js)
-Clicking on a cat card's "feed" button reduces player's fish count and increases that cat's HP, and displays this updated data on the page. This is implemented using Fetch to my own API [here](src/app.mjs).
+3. [AJAX interaction - "feed fish" buttons](src/views/collection.hbs) and (src/public/javascripts/collection.js)
+Clicking on a cat card's "feed fish" button reduces player's fish count and increases that cat's HP, and displays this updated data on the page. This is implemented using Fetch to my own API [here](src/app.mjs).
 ###### 2 classes or higher-order functions
 1. [FighterProfile class](src/fighterProfile.mjs)
 2. [Use of map function to obtain cat roll probabilities](src/gacha.mjs)

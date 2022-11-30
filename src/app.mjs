@@ -97,12 +97,12 @@ app.post('/register', (req, res, next) => {
         Player.register(new Player({
             username: validator.escape(username), // sanitize username just in case
             winStreak: 0,
-            coins: 1000, // TODO temporary for testing
-            fish: 0, // TODO
+            coins: 50,
+            fish: 0,
             playerLevel: 1,
             battleCounter: 0,
             cats: [],
-            currentOpponent: getOpponent('Void'), // All new players start by facing off with Cheesy TODO
+            currentOpponent: getOpponent('Cheesy'), // All new players start by facing off with Cheesy
         }), req.body.password, (err) => {
             if (err) { // Error registering player
                 res.render('login', {errorMsg: 'This username is already in use.', pageName: 'Register', action: 'register'});
