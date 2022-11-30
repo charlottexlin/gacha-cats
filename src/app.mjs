@@ -201,7 +201,7 @@ app.post('/collection', async(req, res) => {
             await cat.save();
             await req.user.save();
             try {
-                res.json({status: 'success', currentHP: cat.currentHP, fish: req.user.fish});
+                res.json({status: 'success', currentHP: cat.currentHP, maxHP: cat.fighterProfile.maxHP, fish: req.user.fish});
             } catch (err) {
                 res.json({status: 'error'});
             }
@@ -438,6 +438,25 @@ app.get('/gacha/roll', async(req, res) => {
                     req.user.coins += 5; // if player already has this cat, convert it to 5 coins and 2 fish instead
                     req.user.fish += 2;
                 }
+                // save the new cat
+                if (haveCat == false) {
+                    const newCat = new Cat({
+                        player: req.user._id,
+                        name: rolledCat.defaultName,
+                        fighterProfile: rolledCat,
+                        currentHP: rolledCat.maxHP,
+                        battlesWon: 0
+                    });
+                    // save the cat into the database
+                    // REFERENCE: https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose
+                    try {
+                        await newCat.save();
+                        req.user.cats.push(newCat._id);
+                        await req.user.save();
+                    } catch (err) {
+                        res.send('Database error saving new cat and updating player');
+                    }
+                }
                 await req.user.save();
                 res.render('gacha-roll', {rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
             } catch (err) {
@@ -456,30 +475,20 @@ app.post('/gacha/roll', async(req, res) => {
     } else if ([...specialChars].some(char => catName.includes(char))) {
         res.render('gacha-roll', {errorMsg: "Cat name can not include special characters, except _ - and .", rolledCat: rolledCat, haveCat: false});
     } else {
-        // ensure cat's name is not a duplicate name
         try {
-            const cat = await Cat.findOne({name: catName, player: req.user._id});
+            // ensure cat's name is not a duplicate name
+            const catWithName = await Cat.findOne({name: catName, player: req.user._id});
             // already have a cat by this name
-            if (cat) {
+            if (catWithName) {
                 res.render('gacha-roll', {errorMsg: 'You already have a cat by that name', rolledCat: rolledCat, haveCat: false});
-            } else { // all good
-                // create the new cat for this player to have
-                const newCat = new Cat({
-                    player: req.user._id,
-                    name: validator.escape(catName), // sanitize cat name, just in case
-                    fighterProfile: rolledCat,
-                    currentHP: rolledCat.maxHP,
-                    battlesWon: 0
-                });
-                // save the cat into the database
-                // REFERENCE: https://stackoverflow.com/questions/33049707/push-items-into-mongo-array-via-mongoose
-                await newCat.save();
-                req.user.cats.push(newCat._id);
-                await req.user.save();
-                res.redirect('/gacha'); // go back to gacha page
+            } else { // all good, find the new cat and rename it
+                const catToUpdate = await Cat.findOne({player: req.user._id, fighterProfile: rolledCat});
+                catToUpdate.name = validator.escape(catName); // sanitize cat name, just in case
+                await catToUpdate.save();
+                res.redirect('/collection'); // go to collection page
             }
         } catch (err) {
-            res.send('Database error finding cat and updating player/cat');
+            res.send('Database error finding cat or updating player/cat');
         }
     }
 });

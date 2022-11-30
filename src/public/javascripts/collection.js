@@ -30,7 +30,7 @@ async function onClick(event) {
     } else { // otherwise update cat's HP text and user's fish text
         alert.classList.add('d-none');
         const hp = event.target.parentElement.querySelector('#hp');
-        hp.textContent = '❤️ ' + updatedData.currentHP;
+        hp.textContent = '❤️ ' + updatedData.currentHP + ' / ' + updatedData.maxHP;
         const fishCount = document.querySelector('#fishCount');
         fishCount.textContent = '🐟 ' + updatedData.fish;
     }
