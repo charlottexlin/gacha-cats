@@ -439,7 +439,7 @@ app.get('/gacha/roll', async(req, res) => {
                     req.user.fish += 2;
                 }
                 // save the new cat
-                if (haveCat == false) {
+                if (haveCat === false) {
                     const newCat = new Cat({
                         player: req.user._id,
                         name: rolledCat.defaultName,
@@ -469,7 +469,7 @@ app.get('/gacha/roll', async(req, res) => {
 // post to gacha roll page, where players can name a new cat they just rolled
 app.post('/gacha/roll', async(req, res) => {
     // validate and sanitize user input for cat's name using Validator library
-    let catName = req.body.name.trim();
+    const catName = req.body.name.trim();
     if (!validator.isByteLength(catName, {min: 1, max: 20})) {
         res.render('gacha-roll', {errorMsg: 'Cat name must be between 1 to 20 characters', rolledCat: rolledCat, haveCat: false});
     } else if ([...specialChars].some(char => catName.includes(char))) {

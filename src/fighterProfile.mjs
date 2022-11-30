@@ -13,7 +13,7 @@ export class FighterProfile {
         this.subtitle = subtitle + "";
 
         // is this fighter a cat or opponent
-        if (fighterType == "cat" || fighterType == "opponent") {
+        if (fighterType === "cat" || fighterType === "opponent") {
             this.fighterType = fighterType;
         } else {
             this.fighterType = "opponent";
@@ -44,7 +44,7 @@ export class FighterProfile {
         }
 
         // user-readable name for roll probability
-        if (rarity == "common" || rarity == "uncommon" || rarity == "rare" || rarity == "legendary") {
+        if (rarity === "common" || rarity === "uncommon" || rarity === "rare" || rarity === "legendary") {
             this.rarity = rarity;
         } else {
             this.rarity = "";
@@ -61,4 +61,4 @@ export class FighterProfile {
 
 export {
     commonPercentage, uncommonPercentage, rarePercentage, legendaryPercentage
-}
+};

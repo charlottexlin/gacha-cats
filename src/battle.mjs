@@ -8,6 +8,17 @@ export function createOpponent(opponentProfile) {
     return {fighterProfile: opponentProfile, currentHP: opponentProfile.maxHP};
 }
 
+// Return the damage a fighter does, damage is random and scaled off the fighter's power level
+function calculateAttack(critRate, powerLevel) {
+    const isCrit = chance.weighted([true, false], [critRate, 1-critRate]);
+    // critical hit - attack is double the power level
+    if (isCrit === true) {
+        return {atk: Math.round(powerLevel * 2), crit: true};
+    } else {
+        return {atk: Math.round(powerLevel * chance.floating({ min: 0.8, max: 1.4})), crit: false};
+    }
+}
+
 // Runs one round of a battle between the two given fighters (NOT profiles)
 export function battleRound(cat, opponent) {
     let continueBattle = true;
@@ -39,16 +50,5 @@ export function battleRound(cat, opponent) {
         oppAtk: oppAtk.atk,
         catCrit: catAtk.crit,
         oppCrit: oppAtk.crit
-    }
-}
-
-// Return the damage a fighter does, damage is random and scaled off the fighter's power level
-function calculateAttack(critRate, powerLevel) {
-    const isCrit = chance.weighted([true, false], [critRate, 1-critRate]);
-    // critical hit - attack is double the power level
-    if (isCrit === true) {
-        return {atk: Math.round(powerLevel * 2), crit: true};
-    } else {
-        return {atk: Math.round(powerLevel * chance.floating({ min: 0.8, max: 1.4})), crit: false};
-    }
+    };
 }
