@@ -98,11 +98,11 @@ app.post('/register', (req, res, next) => {
             username: validator.escape(username), // sanitize username just in case
             winStreak: 0,
             coins: 1000, // TODO temporary for testing
-            fish: 100, // TODO
+            fish: 0, // TODO
             playerLevel: 1,
             battleCounter: 0,
             cats: [],
-            currentOpponent: getOpponent('Cheesy'), // All new players start by facing off with Cheesy
+            currentOpponent: getOpponent('Void'), // All new players start by facing off with Cheesy TODO
         }), req.body.password, (err) => {
             if (err) { // Error registering player
                 res.render('login', {errorMsg: 'This username is already in use.', pageName: 'Register', action: 'register'});
@@ -174,7 +174,7 @@ app.get('/collection', async(req, res) => {
 // user clicked on a button to feed fish to one of the cats on the collection page
 app.post('/collection', async(req, res) => {
     // find the requested cat in the database
-    const cat = await Cat.findOne({name: req.body.catName});
+    const cat = await Cat.findOne({player: req.user._id, name: req.body.catName});
     // user doesn't have enough fish
     if (req.user.fish <= 0) {
         res.json({status: 'success', errorMsg: "You don't have enough fish. Win battles to get more fish!"});
@@ -192,8 +192,8 @@ app.post('/collection', async(req, res) => {
         }
         req.user.fish--;
         await cat.save();
+        await req.user.save();
         try {
-            await req.user.save();
             res.json({status: 'success', currentHP: cat.currentHP, fish: req.user.fish});
         } catch (err) {
             res.json({status: 'error'});
@@ -223,7 +223,7 @@ app.get('/battle', async(req, res) => {
 
 // player chooses which cat to use for the battle
 app.post('/battle', async(req, res) => {
-    const cat = await Cat.findOne({name: req.body.chosenCat});
+    const cat = await Cat.findOne({player: req.user._id, name: req.body.chosenCat});
     // Can not use a cat in battle if they are at 0 HP
     if (cat.currentHP <= 0) {
         // get the documents for each of this player's cats
@@ -275,7 +275,7 @@ app.get('/battle/fight', (req, res) => {
 async function battleEnd(req, res, winner) {
     let levelUp = false;
     // update cat's current HP and battles won
-    const cat = await Cat.findOne({name: chosenCat.name});
+    const cat = await Cat.findOne({player: req.user._id, name: chosenCat.name});
     cat.currentHP = chosenCat.currentHP;
     if (winner === 'cat') {
         cat.battlesWon++;
@@ -344,10 +344,18 @@ async function battleEnd(req, res, winner) {
         // update player's win streak
         if (req.user.winStreak > 0) {
             req.user.winStreak = 0;
-            await req.user.save();
         }
+        // check if all player's cats are at 0 HP, and 0 fish are left
+        const cat = await Cat.findOne({player: req.user._id, currentHP: {$gt: 0}});
         // show lose screen
-        res.render('battle-lose');
+        if (!cat && req.user.fish <= 0) {
+            res.render('battle-lose', {failsafe: true});
+            // give player free fish as failsafe
+            req.user.fish += 5;
+        } else {
+            res.render('battle-lose', {failsafe: false});
+        }
+        await req.user.save();
     }
     battleRounds = 0;
     chosenCat = null;

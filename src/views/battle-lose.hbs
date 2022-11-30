@@ -3,6 +3,11 @@
     <!-- Page header -->
     <p class="h1">You lost!<p>
     <div class="container-sm text-center">
+        {{#if failsafe}}
+            <p class="h4">All your cats are at 0 HP and you have no fish left! Here's a free gift.</p>
+            <p class="h2">You got:
+            <p class="h3">🐟 5</p>
+        {{/if}}
         <div class="row justify-content-sm-center">
             <!-- Columns to space out the page properly -->
             <div class="col col-sm-4"></div>
