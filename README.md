@@ -27,7 +27,11 @@ An example Player:
   playerLevel: 1, // (total # of battles won) / 10
   battleCounter: 0, // number of battles this player has won since they last leveled up, used for setting player level
   cats: [ ], // array of references to Cats documents; represents the Cats a player has
-  currentOpponent: { } // a FighterProfile object that represents the current opponent this player is facing
+  currentOpponentProfile: { }, // a FighterProfile object that represents the current opponent this player is facing
+  currentOpponent: { }, // an object that holds the current opponent's FighterProfile and its current HP, to be used in battle
+  chosenCat: { }, // a reference to a Cat document that represents the cat the player is currently using in battle
+  battleRounds: 0, // what round of battle the player is currently on
+  rolledCat: { } // a FighterProfile object that represents the cat a player just rolled on the gacha
 }
 ```
 
@@ -171,3 +175,4 @@ Clicking on a cat card's "feed fish" button reduces player's fish count and incr
 26. [bootstrap optimization](https://getbootstrap.com/docs/5.0/customize/optimize/)
 27. [purgecss tutorial](https://medium.com/dwarves-foundation/remove-unused-css-styles-from-bootstrap-using-purgecss-88395a2c5772)
 28. [purgecss documentation](https://purgecss.com/CLI.html)
+29. [mongoose save bug fix stack overflow](https://stackoverflow.com/questions/38563597/mongoose-not-saving-data-with-no-error) - (src/app.mjs)
