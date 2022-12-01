@@ -268,7 +268,6 @@ app.get('/battle/fight', (req, res) => {
         // subsequent rounds
         else {
             // battle is ongoing
-            battleRounds++;
             const roundResults = battleRound(chosenCat, currentOpponent);
             if (roundResults.continueBattle) {
                 res.render('battle-fight', {
@@ -280,6 +279,7 @@ app.get('/battle/fight', (req, res) => {
                     catCrit: roundResults.catCrit,
                     oppCrit: roundResults.oppCrit
                 });
+                battleRounds++;
             }
             // battle has ended, we have a winner
             else {
@@ -480,7 +480,12 @@ app.post('/gacha/roll', async(req, res) => {
             const catWithName = await Cat.findOne({name: catName, player: req.user._id});
             // already have a cat by this name
             if (catWithName) {
-                res.render('gacha-roll', {errorMsg: 'You already have a cat by that name', rolledCat: rolledCat, haveCat: false});
+                // if the player submits cat's default name and hasn't already used that name for another cat, there is no need to update the new cat's document in the database
+                if (catWithName.fighterProfile.defaultName === rolledCat.defaultName) {
+                    res.redirect('/collection'); // go to collection page
+                } else {
+                    res.render('gacha-roll', {errorMsg: 'You already have a cat with that name', rolledCat: rolledCat, haveCat: false});
+                }
             } else { // all good, find the new cat and rename it
                 const catToUpdate = await Cat.findOne({player: req.user._id, fighterProfile: rolledCat});
                 catToUpdate.name = validator.escape(catName); // sanitize cat name, just in case
