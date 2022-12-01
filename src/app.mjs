@@ -23,12 +23,6 @@ const __dirname = path.dirname(__filename);
 const Player = mongoose.model('Player');
 const Cat = mongoose.model('Cat');
 
-// globals
-let rolledCat = null;
-let chosenCat = null;
-let currentOpponent = null;
-let battleRounds = 0;
-
 // use handlebars
 app.set("view engine", "hbs");
 
@@ -74,8 +68,6 @@ app.get('/', (req, res) => {
 
 // registration page, where new players can make an account
 app.get('/register', (req, res) => {
-    chosenCat = null;
-    battleRounds = 0;
     res.render('login', {pageName: 'Register', action: 'register'});
 });
 
@@ -102,7 +94,7 @@ app.post('/register', (req, res, next) => {
             playerLevel: 1,
             battleCounter: 0,
             cats: [],
-            currentOpponent: getOpponent('Cheesy'), // All new players start by facing off with Cheesy
+            currentOpponentProfile: getOpponent('Cheesy'), // All new players start by facing off with Cheesy
         }), req.body.password, (err) => {
             if (err) { // Error registering player
                 res.render('login', {errorMsg: 'This username is already in use.', pageName: 'Register', action: 'register'});
@@ -118,8 +110,6 @@ app.post('/register', (req, res, next) => {
 
 // login page, where returning players can log into an existing account
 app.get('/login', (req, res) => {
-    chosenCat = null;
-    battleRounds = 0;
     res.render('login', {pageName: 'Login', action: 'login'});
 });
 
@@ -198,8 +188,12 @@ app.post('/collection', async(req, res) => {
                 cat.currentHP += 5;
             }
             req.user.fish--;
-            await cat.save();
-            await req.user.save();
+            try {
+                await cat.save();
+                await req.user.save();
+            } catch (err) {
+                res.send('Error updating cat and player');
+            }
             try {
                 res.json({status: 'success', currentHP: cat.currentHP, maxHP: cat.fighterProfile.maxHP, fish: req.user.fish});
             } catch (err) {
@@ -217,17 +211,29 @@ app.get('/battle', async(req, res) => {
     if (!req.user) {
         res.redirect('/');
     } else {
+        req.user.chosenCat = null;
+        req.user.battleRounds = 0;
+        try {
+            await req.user.save();
+        } catch (err) {
+            res.send('Database error updating player');
+        }
         try {
             // create opponent
-            currentOpponent = createOpponent(req.user.currentOpponent);
+            req.user.currentOpponent = createOpponent(req.user.currentOpponentProfile);
+            try {
+                await req.user.save();
+            } catch (err) {
+                res.send('Database error updating player');
+            }
 
             // get the documents for each of this player's cats
             const cats = await Cat.find({'_id': {$in: req.user.cats}});
             // show battle set-up page with dropdown options for all the player's cats
             if (cats.length === 0) {
-                res.render('battle', {opponent: currentOpponent, noCats: true, cats: cats});
+                res.render('battle', {opponent: req.user.currentOpponent, noCats: true, cats: cats});
             } else {
-                res.render('battle', {opponent: currentOpponent, noCats: false, cats: cats});
+                res.render('battle', {opponent: req.user.currentOpponent, noCats: false, cats: cats});
             }
         } catch (err) {
             res.send('Database error finding cat');
@@ -244,9 +250,14 @@ app.post('/battle', async(req, res) => {
             // get the documents for each of this player's cats
             const cats = await Cat.find({'_id': {$in: req.user.cats}});
             // show battle set-up page with dropdown options for all the player's cats
-            res.render('battle', {errorMsg: cat.name + " is at 0 HP and can not battle. Restore their HP by feeding them fish on the collection page.", opponent: currentOpponent, noCats: false, cats: cats});
+            res.render('battle', {errorMsg: cat.name + " is at 0 HP and can not battle. Restore their HP by feeding them fish on the collection page.", opponent: req.user.currentOpponent, noCats: false, cats: cats});
         } else {
-            chosenCat = cat;
+            req.user.chosenCat = cat;
+            try {
+                req.user.save();
+            } catch (err) {
+                res.send('Database error updating player');
+            }
             res.redirect('/battle/fight');
         }
     } catch (err) {
@@ -255,42 +266,54 @@ app.post('/battle', async(req, res) => {
 });
 
 // battle fight page, where players can fight an opponent
-app.get('/battle/fight', (req, res) => {
+app.get('/battle/fight', async (req, res) => {
     // redirect to homepage if not logged in
-    if (!req.user || !chosenCat) {
+    if (!req.user || !req.user.chosenCat) {
         res.redirect('/');
     } else {
+        // find the requested cat in the database
+        const chosenCat = await Cat.findOne({player: req.user._id, _id: req.user.chosenCat});
         // first round of battle
-        if (battleRounds === 0) {
-            res.render('battle-fight', {opponent: currentOpponent, cat: chosenCat, battleRound: battleRounds});
-            battleRounds++;
+        if (req.user.battleRounds === 0) {
+            res.render('battle-fight', {opponent: req.user.currentOpponent, cat: chosenCat, battleRound: req.user.battleRounds});
+            req.user.battleRounds++;
         }
         // subsequent rounds
         else {
             // battle is ongoing
-            const roundResults = battleRound(chosenCat, currentOpponent);
+            const roundResults = battleRound(chosenCat, req.user.currentOpponent);
             if (roundResults.continueBattle) {
                 res.render('battle-fight', {
-                    opponent: currentOpponent,
+                    opponent: req.user.currentOpponent,
                     cat: chosenCat,
-                    battleRound: battleRounds,
+                    battleRound: req.user.battleRounds,
                     catAtk: roundResults.catAtk,
                     oppAtk: roundResults.oppAtk,
                     catCrit: roundResults.catCrit,
                     oppCrit: roundResults.oppCrit
                 });
-                battleRounds++;
+                req.user.battleRounds++;
             }
             // battle has ended, we have a winner
             else {
-                battleEnd(req, res, roundResults.winner);
+                battleEnd(req, res, roundResults.winner, chosenCat);
             }
+        }
+        try {
+            // REFERENCE: https://stackoverflow.com/questions/38563597/mongoose-not-saving-data-with-no-error
+            req.user.markModified('currentOpponent');
+            req.user.markModified('chosenCat');
+            req.user.markModified('battleRounds');
+            await req.user.save();
+            await chosenCat.save();
+        } catch (err) {
+            res.send('Database error updating cat or player');
         }
     }
 });
 
 // helper function that does all necessary updates after a battle ends
-async function battleEnd(req, res, winner) {
+async function battleEnd(req, res, winner, chosenCat) {
     let levelUp = false;
     // update cat's current HP and battles won
     try {
@@ -306,7 +329,7 @@ async function battleEnd(req, res, winner) {
     // player's cat won
     if (winner === 'cat') {
         // Give player coins and fish, amount is based on level of current opponent
-        const opponentLevel = currentOpponent.fighterProfile.powerLevel;
+        const opponentLevel = req.user.currentOpponent.fighterProfile.powerLevel;
         let fish = 0;
         let coins = 0;
         switch (opponentLevel) {
@@ -353,15 +376,7 @@ async function battleEnd(req, res, winner) {
             req.user.battleCounter++;
         }
         // Get a new current opponent for the player
-        const randomOpponent = getRandomOpponent();
-        req.user.currentOpponent = randomOpponent;
-        try {
-            await req.user.save();
-        } catch (err) {
-            res.send('Database error updating player');
-        }
-        // Set global
-        currentOpponent = randomOpponent;
+        req.user.currentOpponentProfile = getRandomOpponent();
         // show win screen
         res.render('battle-win', {fish: fish, coins: coins, levelUp: levelUp});
     }
@@ -382,21 +397,24 @@ async function battleEnd(req, res, winner) {
             } else {
                 res.render('battle-lose', {failsafe: false});
             }
-            await req.user.save();
         } catch (err) {
-            res.send('Database error finding cat and updating player');
+            res.send('Database error finding cat');
         }
     }
-    battleRounds = 0;
-    chosenCat = null;
+    req.user.chosenCat = null;
+    req.user.battleRounds = 0;
+    try {
+        await req.user.save();
+    } catch (err) {
+        res.send('Database error updating player');
+    }
 }
 
 // player chooses whether to give up or try again with the current opponent
 app.post('/battle/lose', async(req, res) => {
     if (req.body.postBattle === 'giveUp') { // player gives up on opponent
         const randomOpponent = getRandomOpponent(); // give player a new opponent for next round
-        req.user.currentOpponent = randomOpponent;
-        currentOpponent = randomOpponent;
+        req.user.currentOpponentProfile = randomOpponent;
         try {
             await req.user.save();
         } catch (err) {
@@ -429,9 +447,9 @@ app.get('/gacha/roll', async(req, res) => {
             res.render('gacha', {errorMsg: "You don't have enough coins to roll. Battle to earn more coins!"});
         } else {
             req.user.coins -= 10; // costs 10 coins to roll
-            rolledCat = getGachaRoll(); // calculate the cat the player rolled
+            req.user.rolledCat = getGachaRoll(); // calculate the cat the player rolled
             try {
-                const cat = await Cat.findOne({player: req.user._id, fighterProfile: rolledCat}); // check if the player already has this cat
+                const cat = await Cat.findOne({player: req.user._id, fighterProfile: req.user.rolledCat}); // check if the player already has this cat
                 let haveCat = false;
                 if (cat) {
                     haveCat = true;
@@ -442,9 +460,9 @@ app.get('/gacha/roll', async(req, res) => {
                 if (haveCat === false) {
                     const newCat = new Cat({
                         player: req.user._id,
-                        name: rolledCat.defaultName,
-                        fighterProfile: rolledCat,
-                        currentHP: rolledCat.maxHP,
+                        name: req.user.rolledCat.defaultName,
+                        fighterProfile: req.user.rolledCat,
+                        currentHP: req.user.rolledCat.maxHP,
                         battlesWon: 0
                     });
                     // save the cat into the database
@@ -452,13 +470,16 @@ app.get('/gacha/roll', async(req, res) => {
                     try {
                         await newCat.save();
                         req.user.cats.push(newCat._id);
-                        await req.user.save();
                     } catch (err) {
-                        res.send('Database error saving new cat and updating player');
+                        res.send('Database error saving new cat');
                     }
                 }
-                await req.user.save();
-                res.render('gacha-roll', {rolledCat: rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
+                try {
+                    await req.user.save();
+                } catch (err) {
+                    res.send('Database error updating player');
+                }
+                res.render('gacha-roll', {rolledCat: req.user.rolledCat, haveCat: haveCat}); // render page with the cat the player rolled
             } catch (err) {
                 res.send('Database error finding cat and updating player');
             }
@@ -471,9 +492,9 @@ app.post('/gacha/roll', async(req, res) => {
     // validate and sanitize user input for cat's name using Validator library
     const catName = req.body.name.trim();
     if (!validator.isByteLength(catName, {min: 1, max: 20})) {
-        res.render('gacha-roll', {errorMsg: 'Cat name must be between 1 to 20 characters', rolledCat: rolledCat, haveCat: false});
+        res.render('gacha-roll', {errorMsg: 'Cat name must be between 1 to 20 characters', rolledCat: req.user.rolledCat, haveCat: false});
     } else if ([...specialChars].some(char => catName.includes(char))) {
-        res.render('gacha-roll', {errorMsg: "Cat name can not include special characters, except _ - and .", rolledCat: rolledCat, haveCat: false});
+        res.render('gacha-roll', {errorMsg: "Cat name can not include special characters, except _ - and .", rolledCat: req.user.rolledCat, haveCat: false});
     } else {
         try {
             // ensure cat's name is not a duplicate name
@@ -481,13 +502,13 @@ app.post('/gacha/roll', async(req, res) => {
             // already have a cat by this name
             if (catWithName) {
                 // if the player submits cat's default name and hasn't already used that name for another cat, there is no need to update the new cat's document in the database
-                if (catWithName.fighterProfile.defaultName === rolledCat.defaultName) {
+                if (catWithName.fighterProfile.defaultName === req.user.rolledCat.defaultName) {
                     res.redirect('/collection'); // go to collection page
                 } else {
-                    res.render('gacha-roll', {errorMsg: 'You already have a cat with that name', rolledCat: rolledCat, haveCat: false});
+                    res.render('gacha-roll', {errorMsg: 'You already have a cat with that name', rolledCat: req.user.rolledCat, haveCat: false});
                 }
             } else { // all good, find the new cat and rename it
-                const catToUpdate = await Cat.findOne({player: req.user._id, fighterProfile: rolledCat});
+                const catToUpdate = await Cat.findOne({player: req.user._id, fighterProfile: req.user.rolledCat});
                 catToUpdate.name = validator.escape(catName); // sanitize cat name, just in case
                 await catToUpdate.save();
                 res.redirect('/collection'); // go to collection page

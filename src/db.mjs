@@ -9,8 +9,12 @@ const PlayerSchema = new mongoose.Schema({
     fish: {type: Number, min: 0, required: true}, // in-game currency used for restoring Cat HP
     playerLevel: {type: Number, min: 1, required: true}, // (total # of battles won) / 10
     battleCounter: {type: Number, min: 0, max: 10, required: true}, // number of battles this player has won since they last leveled up, used for setting player level
-    cats: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Cat' }], // array of references to Cats documents; represents the Cats a player has
-    currentOpponent: {type: Object, required: true} // a FighterProfile object that represents the current opponent this player is facing
+    cats: [{type: mongoose.Schema.Types.ObjectId, ref: 'Cat'}], // array of references to Cats documents; represents the Cats a player has
+    currentOpponentProfile: {type: Object, required: true}, // a FighterProfile object that represents the current opponent this player is facing
+    currentOpponent: {type: Object}, // an object that holds the current opponent's FighterProfile and its current HP, to be used in battle
+    chosenCat: {type: mongoose.Schema.Types.ObjectId, ref: 'Cat'}, // a reference to a Cat document that represents the cat the player is currently using in battle
+    battleRounds: {type: Number}, // what round of battle the player is currently on
+    rolledCat: {type: Object} // a FighterProfile object that represents the cat a player just rolled on the gacha
 });
 
 // authentication for player login
