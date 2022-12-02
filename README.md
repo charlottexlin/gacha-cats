@@ -121,7 +121,7 @@ In the header of the web app, it shows the title of the game, navigation buttons
 * (1 point) Session store without memory leaks using MemoryStore library: [here](src/app.mjs)
 * (2 points) UI using Bootstrap, with a customized theme in Sass: [scss file here](src/public/scss/custom.scss)
 * (1 point) User text input validation + sanitization using Validator library: [here](src/app.mjs)
-* (1 point) Custom font using Google Fonts API: [here](src/views/layout.hbs)
+* (1 point) Custom font using Google Fonts API: [here](src/views/layout.hbs), API documentation [here](https://developers.google.com/fonts/docs/getting_started)
 * (1 point) Optimized bootstrap CSS file using purgecss library (in development environment)
 
 Total: 12 points
