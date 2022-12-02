@@ -135,9 +135,10 @@ Total: 12 points
 2. [Form to select a cat to enter battle](src/views/battle.hbs)
 3. [AJAX interaction - "feed fish" buttons](src/views/collection.hbs) and (src/public/javascripts/collection.js)
 Clicking on a cat card's "feed fish" button reduces player's fish count and increases that cat's HP, and displays this updated data on the page. This is implemented using Fetch to my own API [here](src/app.mjs).
-###### 2 classes or higher-order functions
+###### Classes or higher-order functions
 1. [FighterProfile class](src/fighterProfile.mjs)
 2. [Use of map function to obtain cat roll probabilities](src/gacha.mjs)
+3. [Use of some function to check if username submitted in form contains any characters that are not allowed](src/app.mjs)
 ###### Stability / security
 1. [User input validation for all user text input](src/app.mjs)
 2. [Escapes all user input before saving to DB](src/app.mjs)
