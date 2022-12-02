@@ -117,7 +117,7 @@ In the header of the web app, it shows the title of the game, navigation buttons
 ## Research Topics
 
 * (5 points) User authentication using PassportJS
-* (1 point) Implemented gacha and battle functionality using ChanceJS library: [gacha](src/gacha.mjs) and [battle](src/battle.mjs)
+* (1 point) Implemented gacha and battle functionality using ChanceJS library: [gacha](src/gacha.mjs) and [battle](src/battle.mjs) - also [opponentProfiles](src/opponentProfiles.mjs)
 * (1 point) Session store without memory leaks using MemoryStore library: [here](src/app.mjs)
 * (2 points) UI using Bootstrap, with a customized theme in Sass: [scss file here](src/public/scss/custom.scss)
 * (1 point) User text input validation + sanitization using Validator library: [here](src/app.mjs)
