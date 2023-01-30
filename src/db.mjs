@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 import passportLocalMongoose from 'passport-local-mongoose';
+import dotenv from "dotenv";
+
+// configure environment variables
+dotenv.config();
 
 // players, who each must register with a username and password to play the game, and can login to their accounts
 const PlayerSchema = new mongoose.Schema({
@@ -33,4 +37,4 @@ const CatSchema = new mongoose.Schema({
 const Player = mongoose.model('Player', PlayerSchema);
 const Cat = mongoose.model('Cat', CatSchema);
 
-mongoose.connect(process.env.database);
+mongoose.connect(process.env.DATABASE);
